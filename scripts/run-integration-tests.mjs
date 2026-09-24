@@ -8,6 +8,7 @@ const composeFile = resolve(root, 'docker-compose.test.yml');
 const project = 'tempopoint-test-' + process.pid;
 const migratorPassword = randomBytes(24).toString('hex');
 const appPassword = randomBytes(24).toString('hex');
+const seedPassword = randomBytes(24).toString('base64url');
 const compose = process.platform === 'win32' ? 'docker.exe' : 'docker';
 const pnpmCli = process.env.npm_execpath;
 if (!pnpmCli) throw new Error('pnpm execution path is unavailable.');
@@ -54,7 +55,11 @@ try {
     '@127.0.0.1:' +
     port +
     '/tempopoint_test?schema=public';
-  const testEnvironment = { ...process.env, DATABASE_URL: migratorUrl };
+  const testEnvironment = {
+    ...process.env,
+    DATABASE_URL: migratorUrl,
+    DEVELOPMENT_SEED_PASSWORD: seedPassword,
+  };
 
   run(
     process.execPath,
@@ -117,6 +122,7 @@ try {
         ...process.env,
         DATABASE_URL: appUrl,
         DATABASE_MIGRATOR_URL: migratorUrl,
+        DEVELOPMENT_SEED_PASSWORD: seedPassword,
       },
     },
   );

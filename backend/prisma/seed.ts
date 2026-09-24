@@ -1,4 +1,5 @@
 import { PrismaClient, CompanyRole } from '@prisma/client';
+import { hashPassword } from '../src/security/password.js';
 
 const prisma = new PrismaClient();
 
@@ -53,6 +54,10 @@ const users = [
 ] as const;
 
 async function main() {
+  const seedPassword = process.env.DEVELOPMENT_SEED_PASSWORD;
+  const passwordHash = seedPassword
+    ? await hashPassword(seedPassword)
+    : 'development-seed-hash-not-for-authentication';
   const companyBySlug = new Map<string, string>();
   for (const company of companies) {
     const record = await prisma.company.upsert({
@@ -77,7 +82,7 @@ async function main() {
     if (!companyId) throw new Error('Seed company is missing.');
     await prisma.user.upsert({
       where: { companyId_email: { companyId, email } },
-      update: { firstName, lastName, role, active: true },
+      update: { firstName, lastName, role, active: true, passwordHash },
       create: {
         companyId,
         email,
@@ -85,10 +90,19 @@ async function main() {
         lastName,
         role,
         active: true,
-        passwordHash: 'development-seed-hash-not-for-authentication',
+        passwordHash,
       },
     });
   }
+  await prisma.platformUser.upsert({
+    where: { email: 'platform-admin@tempopoint.test' },
+    update: { active: true, passwordHash },
+    create: {
+      email: 'platform-admin@tempopoint.test',
+      active: true,
+      passwordHash,
+    },
+  });
 }
 
 main()

@@ -1618,25 +1618,25 @@ milestone(2): implement tenant data foundation
 
 **Objectif :** authentification sûre des utilisateurs et plateforme.
 
--   [ ] Login User.
--   [ ] Logout User.
--   [ ] Endpoint `/api/me`.
--   [ ] Login PlatformUser séparé.
--   [ ] Cookie HttpOnly.
--   [ ] Secure en production.
--   [ ] SameSite approprié.
--   [ ] Sessions invalidables.
--   [ ] Hash sécurisé des mots de passe.
--   [ ] Rate limiting login.
--   [ ] RBAC WORKER/MANAGER/ADMIN.
--   [ ] Protection CSRF adaptée.
--   [ ] Reset password.
--   [ ] Désactivation utilisateur.
--   [ ] Désactivation entreprise bloque les connexions client.
--   [ ] Tests de permissions.
--   [ ] Tests tenant + auth.
--   [ ] Tests PlatformUser séparé.
--   [ ] Commit du jalon.
+-   [x] Login User.
+-   [x] Logout User.
+-   [x] Endpoint `/api/me`.
+-   [x] Login PlatformUser séparé.
+-   [x] Cookie HttpOnly.
+-   [x] Secure en production.
+-   [x] SameSite approprié.
+-   [x] Sessions invalidables.
+-   [x] Hash sécurisé des mots de passe.
+-   [x] Rate limiting login.
+-   [x] RBAC WORKER/MANAGER/ADMIN.
+-   [x] Protection CSRF adaptée.
+-   [x] Reset password.
+-   [x] Désactivation utilisateur.
+-   [x] Désactivation entreprise bloque les connexions client.
+-   [x] Tests de permissions.
+-   [x] Tests tenant + auth.
+-   [x] Tests PlatformUser séparé.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

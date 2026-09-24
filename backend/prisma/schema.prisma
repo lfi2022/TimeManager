@@ -14,49 +14,113 @@ enum CompanyRole {
 }
 
 model Company {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  active    Boolean  @default(true)
-  timezone  String
-  locale    String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-  users     User[]
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  slug               String              @unique
+  active             Boolean             @default(true)
+  timezone           String
+  locale             String
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @db.Timestamptz(6)
+  users              User[]
+  userSessions       UserSession[]
+  passwordResetTokens UserPasswordResetToken[]
 
   @@map("Company")
 }
 
 model PlatformUser {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique
-  passwordHash String
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
-  lastLoginAt  DateTime? @db.Timestamptz(6)
+  id                  String                    @id @default(uuid()) @db.Uuid
+  email               String                    @unique
+  passwordHash        String
+  active              Boolean                   @default(true)
+  createdAt           DateTime                  @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime                  @updatedAt @db.Timestamptz(6)
+  lastLoginAt         DateTime?                 @db.Timestamptz(6)
+  sessions            PlatformSession[]
+  passwordResetTokens PlatformPasswordResetToken[]
 
   @@map("PlatformUser")
 }
 
 model User {
-  id             String      @id @default(uuid()) @db.Uuid
-  companyId      String      @db.Uuid
-  email          String
-  passwordHash   String
-  firstName      String
-  lastName       String
-  role           CompanyRole
-  active         Boolean     @default(true)
-  employeeNumber String?
-  phone          String?
-  timezone       String?
-  locale         String?
-  createdAt      DateTime    @default(now()) @db.Timestamptz(6)
-  updatedAt      DateTime    @updatedAt @db.Timestamptz(6)
-  company        Company     @relation(fields: [companyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id                  String                   @id @default(uuid()) @db.Uuid
+  companyId           String                   @db.Uuid
+  email               String
+  passwordHash        String
+  firstName           String
+  lastName            String
+  role                CompanyRole
+  active              Boolean                  @default(true)
+  employeeNumber      String?
+  phone               String?
+  timezone            String?
+  locale              String?
+  createdAt           DateTime                 @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime                 @updatedAt @db.Timestamptz(6)
+  company             Company                  @relation(fields: [companyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  sessions            UserSession[]
+  passwordResetTokens UserPasswordResetToken[]
 
   @@unique([companyId, email])
   @@index([companyId])
   @@map("User")
+}
+
+model UserSession {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  userId      String    @db.Uuid
+  tokenHash   String    @unique
+  expiresAt   DateTime  @db.Timestamptz(6)
+  invalidatedAt DateTime? @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  lastSeenAt  DateTime  @default(now()) @db.Timestamptz(6)
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, userId])
+  @@map("UserSession")
+}
+
+model PlatformSession {
+  id             String    @id @default(uuid()) @db.Uuid
+  platformUserId String    @db.Uuid
+  tokenHash      String    @unique
+  expiresAt      DateTime  @db.Timestamptz(6)
+  invalidatedAt  DateTime? @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+  lastSeenAt     DateTime  @default(now()) @db.Timestamptz(6)
+  platformUser   PlatformUser @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+
+  @@index([platformUserId])
+  @@map("PlatformSession")
+}
+
+model UserPasswordResetToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  userId      String    @db.Uuid
+  tokenHash   String    @unique
+  expiresAt   DateTime  @db.Timestamptz(6)
+  usedAt      DateTime? @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, userId])
+  @@map("UserPasswordResetToken")
+}
+
+model PlatformPasswordResetToken {
+  id             String    @id @default(uuid()) @db.Uuid
+  platformUserId String    @db.Uuid
+  tokenHash      String    @unique
+  expiresAt      DateTime  @db.Timestamptz(6)
+  usedAt         DateTime? @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+  platformUser   PlatformUser @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+
+  @@index([platformUserId])
+  @@map("PlatformPasswordResetToken")
 }

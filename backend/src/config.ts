@@ -1,11 +1,11 @@
 import { isIP } from 'node:net';
 import { z } from 'zod';
+
 const trustProxySchema = z
   .string()
   .default('false')
   .transform((value, context) => {
     if (value === 'false') return false;
-    // Trust only explicitly configured proxy addresses, never arbitrary senders.
     const entries = value.split(',').map((entry) => entry.trim());
     const valid = entries.every((entry) => {
       const [address, prefix, extra] = entry.split('/');
@@ -26,6 +26,7 @@ const trustProxySchema = z
     }
     return entries;
   });
+
 const environmentSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
@@ -35,10 +36,34 @@ const environmentSchema = z.object({
   APP_URL: z.url().default('http://localhost:3000'),
   TRUST_PROXY: trustProxySchema,
   DATABASE_URL: z.union([z.url(), z.literal('A_REMPLIR')]).optional(),
+  SESSION_SECRET: z
+    .union([z.string().min(32), z.literal('A_REMPLIR')])
+    .optional(),
+  SESSION_TTL_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 31)
+    .default(24),
+  PASSWORD_MIN_LENGTH: z.coerce.number().int().min(8).max(128).default(12),
+  PASSWORD_RESET_TTL_MINUTES: z.coerce
+    .number()
+    .int()
+    .min(5)
+    .max(24 * 60)
+    .default(60),
+  LOGIN_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(100).default(5),
+  LOGIN_RATE_LIMIT_WINDOW_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(3600)
+    .default(900),
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
 });
+
 export function parseEnvironment(environment: NodeJS.ProcessEnv) {
   const result = environmentSchema.safeParse(environment);
   if (!result.success)
@@ -48,11 +73,18 @@ export function parseEnvironment(environment: NodeJS.ProcessEnv) {
     );
   return result.data;
 }
+export type Environment = ReturnType<typeof parseEnvironment>;
+
 export function requireDatabaseUrl(config: Environment) {
-  if (!config.DATABASE_URL || config.DATABASE_URL === 'A_REMPLIR') {
+  if (!config.DATABASE_URL || config.DATABASE_URL === 'A_REMPLIR')
     throw new Error('DATABASE_URL is required for database operations.');
-  }
   return config.DATABASE_URL;
 }
-
-export type Environment = ReturnType<typeof parseEnvironment>;
+export function hasAuthConfiguration(config: Environment) {
+  return (
+    config.DATABASE_URL !== undefined &&
+    config.DATABASE_URL !== 'A_REMPLIR' &&
+    config.SESSION_SECRET !== undefined &&
+    config.SESSION_SECRET !== 'A_REMPLIR'
+  );
+}
