@@ -1,9 +1,9 @@
-# LFINFO Hours --- Cahier des charges fonctionnel et technique
+# TempoPoint --- Cahier des charges fonctionnel et technique
 
 > **Document maître du projet --- Version 0.1**
 >
 > **Date :** 24 septembre 2026\
-> **Produit :** LFINFO Hours\
+> **Produit :** TempoPoint\
 > **Éditeur :** LFINFO\
 > **Statut :** spécification initiale avant développement\
 > **Principe :** ce fichier est la source de vérité fonctionnelle et
@@ -92,7 +92,7 @@ Un jalon n'est terminé que si :
 
 # 1. Vision du produit
 
-LFINFO Hours est un SaaS de gestion du temps destiné principalement aux
+TempoPoint est un SaaS de gestion du temps destiné principalement aux
 PME disposant de personnel de terrain : maintenance, électricité, HVAC,
 construction, installation, nettoyage, espaces verts, garages,
 techniciens et métiers similaires.
@@ -110,7 +110,7 @@ pour :
 -   préparer les données nécessaires à la paie ;
 -   suivre les équipes et chantiers.
 
-LFINFO Hours n'est pas un ERP généraliste.
+TempoPoint n'est pas un ERP généraliste.
 
 La V1 ne doit pas intégrer :
 
@@ -1536,25 +1536,25 @@ milestone(0): initialize project specification
 
 **Objectif :** application vide compilable et déployable.
 
--   [ ] Créer le workspace pnpm.
--   [ ] Créer frontend React + TypeScript + Vite.
--   [ ] Créer backend Fastify + TypeScript.
--   [ ] Créer package `shared`.
--   [ ] Activer TypeScript strict.
--   [ ] Configurer ESLint.
--   [ ] Configurer Prettier.
--   [ ] Configurer variables d'environnement.
--   [ ] Configurer Fastify sur port 3000.
--   [ ] Ajouter `/api/health`.
--   [ ] Configurer build frontend.
--   [ ] Faire servir le build React par Fastify en production.
--   [ ] Ajouter fallback React Router.
--   [ ] Configurer proxy Vite `/api` en développement.
--   [ ] Créer `ecosystem.config.cjs`.
--   [ ] Vérifier démarrage PM2.
--   [ ] Ajouter page React temporaire LFINFO Hours.
--   [ ] Ajouter tests minimum health/build.
--   [ ] Commit du jalon.
+-   [x] Créer le workspace pnpm.
+-   [x] Créer frontend React + TypeScript + Vite.
+-   [x] Créer backend Fastify + TypeScript.
+-   [x] Créer package `shared`.
+-   [x] Activer TypeScript strict.
+-   [x] Configurer ESLint.
+-   [x] Configurer Prettier.
+-   [x] Configurer variables d'environnement.
+-   [x] Configurer Fastify sur port 3000.
+-   [x] Ajouter `/api/health`.
+-   [x] Configurer build frontend.
+-   [x] Faire servir le build React par Fastify en production.
+-   [x] Ajouter fallback React Router.
+-   [x] Configurer proxy Vite `/api` en développement.
+-   [x] Créer `ecosystem.config.cjs`.
+-   [x] Vérifier démarrage PM2.
+-   [x] Ajouter page React temporaire TempoPoint.
+-   [x] Ajouter tests minimum health/build.
+-   [x] Commit du jalon.
 
 **Critère principal :**
 
@@ -1989,7 +1989,7 @@ milestone(15): implement platform subscription administration
 -   [ ] Reset password.
 -   [ ] Notification prestation rejetée.
 -   [ ] Notification in-app minimale.
--   [ ] Templates LFINFO Hours.
+-   [ ] Templates TempoPoint.
 -   [ ] Pas de secret dans logs.
 -   [ ] Tests.
 -   [ ] Commit du jalon.
@@ -2131,7 +2131,7 @@ Ne pas implémenter automatiquement. Ces éléments sont des pistes V2+ :
 -   [ ] intégrations secrétariats sociaux ;
 -   [ ] exports spécifiques paie ;
 -   [ ] application native si besoin réel ;
--   [ ] facturation automatique de l'abonnement LFINFO Hours.
+-   [ ] facturation automatique de l'abonnement TempoPoint.
 
 ------------------------------------------------------------------------
 
@@ -2191,7 +2191,7 @@ Toute violation est **bloquante pour la mise en production**.
 
 # 33. Règles de calcul et droit social
 
-LFINFO Hours doit fournir un moteur configurable.
+TempoPoint doit fournir un moteur configurable.
 
 Le logiciel ne doit pas présenter une règle générique comme étant
 automatiquement conforme à toutes les conventions collectives,
@@ -2421,3 +2421,21 @@ Lorsqu'une demande de développement est donnée, Codex doit :
 
 **Aucune fonctionnalité métier ne doit être considérée terminée si son
 isolation entre entreprises n'a pas été testée.**
+
+
+JALON FINAL — Domaines & personnalisation
+
+[ ] tempopoint.lfinfo.be reste le domaine canonique
+[ ] Sous-domaines clients optionnels
+[ ] Domaines personnalisés
+[ ] Vérification de propriété DNS
+[ ] Gestion TLS
+[ ] Association hostname → Company
+[ ] Logo client
+[ ] Couleurs client
+[ ] Page de connexion personnalisée
+[ ] Branding PWA
+[ ] Option "Powered by TempoPoint — LFINFO"
+[ ] Tests anti-usurpation de hostname
+[ ] Tests isolation tenant via domaines
+[ ] Documentation DNS client

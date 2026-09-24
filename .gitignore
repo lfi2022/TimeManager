@@ -33,3 +33,6 @@ backups/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+.tools/
+.pm2/

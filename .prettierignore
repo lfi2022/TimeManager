@@ -1,0 +1,10 @@
+node_modules
+dist
+pnpm-lock.yaml
+.tools
+.pm2
+playwright-report
+test-results
+coverage
+# Preserve the master specification layout.
+LFINFO_HOURS_CAHIER_DES_CHARGES.md

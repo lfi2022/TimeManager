@@ -1,0 +1,39 @@
+{
+  "name": "tempopoint",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": "\u003e=24.0.0 \u003c25"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @lfinfo/shared build \u0026\u0026 pnpm --parallel --filter @lfinfo/backend --filter @lfinfo/frontend dev",
+    "build": "pnpm --filter @lfinfo/shared build \u0026\u0026 pnpm --filter @lfinfo/backend build \u0026\u0026 pnpm --filter @lfinfo/frontend build",
+    "start": "node backend/dist/server.js",
+    "lint": "eslint .",
+    "typecheck": "pnpm --filter @lfinfo/shared build \u0026\u0026 pnpm -r typecheck \u0026\u0026 tsc -p tsconfig.tools.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm build \u0026\u0026 vitest run",
+    "test:e2e": "pnpm build \u0026\u0026 playwright test",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 delete tempopoint",
+    "test:dev": "playwright test -c playwright.dev.config.ts",
+    "test:pm2": "pnpm build \u0026\u0026 node tests/smoke/pm2.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^24.10.0",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.12.0",
+    "pm2": "^7.0.4",
+    "prettier": "^3.7.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^4.0.0"
+  }
+}
