@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CompanyRole {
+  ADMIN
+  MANAGER
+  WORKER
+}
+
+model Company {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  active    Boolean  @default(true)
+  timezone  String
+  locale    String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  users     User[]
+
+  @@map("Company")
+}
+
+model PlatformUser {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
+  lastLoginAt  DateTime? @db.Timestamptz(6)
+
+  @@map("PlatformUser")
+}
+
+model User {
+  id             String      @id @default(uuid()) @db.Uuid
+  companyId      String      @db.Uuid
+  email          String
+  passwordHash   String
+  firstName      String
+  lastName       String
+  role           CompanyRole
+  active         Boolean     @default(true)
+  employeeNumber String?
+  phone          String?
+  timezone       String?
+  locale         String?
+  createdAt      DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime    @updatedAt @db.Timestamptz(6)
+  company        Company     @relation(fields: [companyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([companyId, email])
+  @@index([companyId])
+  @@map("User")
+}

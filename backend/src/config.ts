@@ -34,6 +34,7 @@ const environmentSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   APP_URL: z.url().default('http://localhost:3000'),
   TRUST_PROXY: trustProxySchema,
+  DATABASE_URL: z.union([z.url(), z.literal('A_REMPLIR')]).optional(),
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
@@ -47,4 +48,11 @@ export function parseEnvironment(environment: NodeJS.ProcessEnv) {
     );
   return result.data;
 }
+export function requireDatabaseUrl(config: Environment) {
+  if (!config.DATABASE_URL || config.DATABASE_URL === 'A_REMPLIR') {
+    throw new Error('DATABASE_URL is required for database operations.');
+  }
+  return config.DATABASE_URL;
+}
+
 export type Environment = ReturnType<typeof parseEnvironment>;

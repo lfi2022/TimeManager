@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { buildApp } from '../../backend/src/app.js';
-import { parseEnvironment } from '../../backend/src/config.js';
+import {
+  parseEnvironment,
+  requireDatabaseUrl,
+} from '../../backend/src/config.js';
 
 const apps: Awaited<ReturnType<typeof buildApp>>[] = [];
 afterEach(async () => {
@@ -107,6 +110,21 @@ describe('environment validation', () => {
       PORT: 3000,
       TRUST_PROXY: false,
     });
+  });
+  it('rejects absent or placeholder database URLs for data operations', () => {
+    expect(() => requireDatabaseUrl(parseEnvironment({}))).toThrow(
+      'DATABASE_URL',
+    );
+    expect(() =>
+      requireDatabaseUrl(parseEnvironment({ DATABASE_URL: 'A_REMPLIR' })),
+    ).toThrow('DATABASE_URL');
+    expect(
+      requireDatabaseUrl(
+        parseEnvironment({
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/database',
+        }),
+      ),
+    ).toBe('postgresql://user:pass@localhost:5432/database');
   });
   it.each(['0', '-1', '65536', 'abc', '3.5', ''])(
     'rejects invalid port %s',

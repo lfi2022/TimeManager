@@ -1582,27 +1582,27 @@ milestone(1): initialize lfinfo hours foundation
 
 **Objectif :** fondation de données sécurisée.
 
--   [ ] Installer/configurer Prisma.
--   [ ] Configurer PostgreSQL.
--   [ ] Créer `Company`.
--   [ ] Créer `PlatformUser`.
--   [ ] Créer `User`.
--   [ ] Ajouter rôles ADMIN/MANAGER/WORKER.
--   [ ] Créer contexte tenant backend.
--   [ ] Interdire companyId arbitraire depuis le client.
--   [ ] Créer repositories/services tenant-aware.
--   [ ] Étudier puis implémenter RLS PostgreSQL si compatible avec
+-   [x] Installer/configurer Prisma.
+-   [x] Configurer PostgreSQL.
+-   [x] Créer `Company`.
+-   [x] Créer `PlatformUser`.
+-   [x] Créer `User`.
+-   [x] Ajouter rôles ADMIN/MANAGER/WORKER.
+-   [x] Créer contexte tenant backend.
+-   [x] Interdire companyId arbitraire depuis le client.
+-   [x] Créer repositories/services tenant-aware.
+-   [x] Étudier puis implémenter RLS PostgreSQL si compatible avec
     l'architecture Prisma retenue.
--   [ ] Fail closed en absence de contexte tenant pour données métier.
--   [ ] Créer seed développement.
--   [ ] Créer deux sociétés de test A/B.
--   [ ] Créer utilisateurs A/B.
--   [ ] Tests de migration base vierge.
--   [ ] Tests d'isolation A -\> B.
--   [ ] Tests d'isolation B -\> A.
--   [ ] Test de requête par ID étranger.
--   [ ] Test d'absence de contexte.
--   [ ] Commit du jalon.
+-   [x] Fail closed en absence de contexte tenant pour données métier.
+-   [x] Créer seed développement.
+-   [x] Créer deux sociétés de test A/B.
+-   [x] Créer utilisateurs A/B.
+-   [x] Tests de migration base vierge.
+-   [x] Tests d'isolation A -\> B.
+-   [x] Tests d'isolation B -\> A.
+-   [x] Test de requête par ID étranger.
+-   [x] Test d'absence de contexte.
+-   [x] Commit du jalon.
 
 **Défaut bloquant :** toute fuite entre Company A et Company B.
 

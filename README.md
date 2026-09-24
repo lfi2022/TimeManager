@@ -4,7 +4,7 @@ TempoPoint est le SaaS de gestion du temps de LFINFO pour les PME et leurs équi
 
 Le [cahier des charges fonctionnel et technique](LFINFO_HOURS_CAHIER_DES_CHARGES.md)
 constitue la source de vérité. Le lire intégralement avant toute modification et
-respecter l'ordre des jalons. Les JALONS 0 et 1 constituent la fondation actuelle,
+respecter l'ordre des jalons. Les JALONS 0 à 2 constituent la fondation actuelle,
 en version `0.1.0`.
 
 ## Prérequis et installation
@@ -119,3 +119,30 @@ TypeScript strict est activé sur les trois packages et les tests.
 L'authentification, Prisma/PostgreSQL, l'isolation multi-tenant et la PWA/offline
 appartiennent aux jalons suivants. Cette fondation ne manipule aucune donnée
 métier et ne constitue pas encore une application prête pour des clients.
+
+## Base de données et isolation tenant
+
+Le JALON 2 utilise PostgreSQL et Prisma. Les migrations versionnées sont dans
+`backend/prisma/migrations/`; aucun serveur ne se connecte à la base tant qu’une
+fonctionnalité métier ne l’exige. Pour une base configurée, renseigner une URL
+PostgreSQL dans `.env`, puis exécuter :
+
+```sh
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
+```
+
+Le seed de développement crée les sociétés sentinelles A et B et leurs rôles
+ADMIN, MANAGER et WORKER. Les données tenant sont protégées par repositories
+server-side et par PostgreSQL RLS. Consulter
+[la documentation d’isolation](docs/tenant-isolation.md) avant toute évolution
+métier ou de schéma.
+
+```sh
+pnpm test:integration
+```
+
+Cette commande démarre un PostgreSQL vierge via Docker, applique les migrations,
+exécute le seed et prouve l’isolation A/B avec un rôle applicatif non privilégié.
+Docker Desktop doit être démarré ; les identifiants de test sont éphémères.
