@@ -1,6 +1,8 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { AuthService } from './auth.service.js';
+import { createTenantContextFromIdentity } from '../../tenancy/context.js';
+import { OrganizationService } from '../organization/organization.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -29,7 +31,7 @@ function unavailable(reply: FastifyReply) {
   return reply.code(503).send({
     error: {
       code: 'AUTH_NOT_CONFIGURED',
-      message: 'Authentification non configurée.',
+      message: 'Authentification non configurÃ©e.',
     },
   });
 }
@@ -124,7 +126,7 @@ export async function registerAuthRoutes(
         return reply.code(400).send({
           error: {
             code: 'RESET_TOKEN_INVALID',
-            message: 'Jeton invalide ou expiré.',
+            message: 'Jeton invalide ou expirÃ©.',
           },
         });
       return reply.code(204).send();
@@ -176,6 +178,259 @@ export async function registerAuthRoutes(
         .clearCookie(platformSessionCookie, { path: '/' })
         .code(204)
         .send();
+    },
+  );
+  const organizationService = auth
+    ? new OrganizationService(auth.database)
+    : undefined;
+  const requireAdmin = async (request: FastifyRequest, reply: FastifyReply) => {
+    if (!auth || !organizationService) return unavailable(reply);
+    const session = await auth.userSession(request.cookies[sessionCookie]);
+    if (!session)
+      return reply
+        .code(401)
+        .send({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentification requise.',
+          },
+        });
+    if (session.identity.role !== 'ADMIN')
+      return reply
+        .code(403)
+        .send({
+          error: { code: 'FORBIDDEN', message: 'Accès administrateur requis.' },
+        });
+    (
+      request as FastifyRequest & {
+        tenantContext?: ReturnType<typeof createTenantContextFromIdentity>;
+      }
+    ).tenantContext = createTenantContextFromIdentity({
+      userId: session.identity.id,
+      companyId: session.identity.companyId,
+      role: session.identity.role,
+    });
+  };
+  const requirePlatform = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => {
+    if (!auth || !organizationService) return unavailable(reply);
+    const session = await auth.platformSession(
+      request.cookies[platformSessionCookie],
+    );
+    if (!session)
+      return reply
+        .code(401)
+        .send({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentification requise.',
+          },
+        });
+    (request as FastifyRequest & { platformUserId?: string }).platformUserId =
+      session.identity.id;
+  };
+  const tenant = (request: FastifyRequest) =>
+    (
+      request as FastifyRequest & {
+        tenantContext: ReturnType<typeof createTenantContextFromIdentity>;
+      }
+    ).tenantContext;
+  const platformUserId = (request: FastifyRequest) =>
+    (request as FastifyRequest & { platformUserId: string }).platformUserId;
+  const notFound = (reply: FastifyReply) =>
+    reply
+      .code(404)
+      .send({
+        error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
+      });
+
+  app.get(
+    '/api/platform/companies',
+    { preHandler: requirePlatform },
+    async () => ({
+      data: { companies: await organizationService!.platformCompanies() },
+    }),
+  );
+  app.post(
+    '/api/platform/companies',
+    { preHandler: [requireCsrf, requirePlatform] },
+    async (request, reply) =>
+      reply
+        .code(201)
+        .send({
+          data: {
+            company: await organizationService!.createCompany(
+              platformUserId(request),
+              request.body,
+            ),
+          },
+        }),
+  );
+  app.patch(
+    '/api/platform/companies/:id',
+    { preHandler: [requireCsrf, requirePlatform] },
+    async (request, reply) => {
+      const company = await organizationService!.updateCompany(
+        platformUserId(request),
+        (request.params as { id: string }).id,
+        request.body,
+      );
+      return company ? { data: { company } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/platform/companies/:id/activate',
+    { preHandler: [requireCsrf, requirePlatform] },
+    async (request, reply) => {
+      const company = await organizationService!.updateCompany(
+        platformUserId(request),
+        (request.params as { id: string }).id,
+        { active: true },
+      );
+      return company ? { data: { company } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/platform/companies/:id/deactivate',
+    { preHandler: [requireCsrf, requirePlatform] },
+    async (request, reply) => {
+      const company = await organizationService!.updateCompany(
+        platformUserId(request),
+        (request.params as { id: string }).id,
+        { active: false },
+      );
+      return company ? { data: { company } } : notFound(reply);
+    },
+  );
+
+  app.get(
+    '/api/admin/users',
+    { preHandler: requireAdmin },
+    async (request) => ({
+      data: { users: await organizationService!.users(tenant(request)) },
+    }),
+  );
+  app.get(
+    '/api/admin/users/:id',
+    { preHandler: requireAdmin },
+    async (request, reply) => {
+      const user = await organizationService!.user(
+        tenant(request),
+        (request.params as { id: string }).id,
+      );
+      return user ? { data: { user } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/admin/users',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) =>
+      reply
+        .code(201)
+        .send({
+          data: {
+            user: await organizationService!.createUser(
+              tenant(request),
+              request.body,
+            ),
+          },
+        }),
+  );
+  app.patch(
+    '/api/admin/users/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const user = await organizationService!.updateUser(
+        tenant(request),
+        (request.params as { id: string }).id,
+        request.body,
+      );
+      return user ? { data: { user } } : notFound(reply);
+    },
+  );
+  app.delete(
+    '/api/admin/users/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const user = await organizationService!.deleteUser(
+        tenant(request),
+        (request.params as { id: string }).id,
+      );
+      return user ? reply.code(204).send() : notFound(reply);
+    },
+  );
+
+  app.get(
+    '/api/admin/teams',
+    { preHandler: requireAdmin },
+    async (request) => ({
+      data: { teams: await organizationService!.teams(tenant(request)) },
+    }),
+  );
+  app.post(
+    '/api/admin/teams',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) =>
+      reply
+        .code(201)
+        .send({
+          data: {
+            team: await organizationService!.createTeam(
+              tenant(request),
+              request.body,
+            ),
+          },
+        }),
+  );
+  app.patch(
+    '/api/admin/teams/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const team = await organizationService!.updateTeam(
+        tenant(request),
+        (request.params as { id: string }).id,
+        request.body,
+      );
+      return team ? { data: { team } } : notFound(reply);
+    },
+  );
+  app.delete(
+    '/api/admin/teams/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const removed = await organizationService!.deleteTeam(
+        tenant(request),
+        (request.params as { id: string }).id,
+      );
+      return removed ? reply.code(204).send() : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/admin/teams/:id/members',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const member = await organizationService!.addMember(
+        tenant(request),
+        (request.params as { id: string }).id,
+        request.body,
+      );
+      return member
+        ? reply.code(201).send({ data: { member } })
+        : notFound(reply);
+    },
+  );
+  app.delete(
+    '/api/admin/teams/:id/members/:userId',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (request, reply) => {
+      const removed = await organizationService!.removeMember(
+        tenant(request),
+        (request.params as { id: string }).id,
+        (request.params as { userId: string }).userId,
+      );
+      return removed ? reply.code(204).send() : notFound(reply);
     },
   );
 }

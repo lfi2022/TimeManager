@@ -43,6 +43,10 @@ export class AuthService {
     private readonly config: Environment,
   ) {}
 
+  get database() {
+    return this.prisma;
+  }
+
   private tokenHash(token: string) {
     return createHash('sha256').update(token).digest('hex');
   }

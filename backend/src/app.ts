@@ -7,6 +7,7 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import type { PrismaClient } from '@prisma/client';
 import type { HealthResponse } from '@lfinfo/shared';
+import { ZodError } from 'zod';
 import { createPrismaClient } from './db/client.js';
 import { hasAuthConfiguration, type Environment } from './config.js';
 import { AuthService } from './modules/auth/auth.service.js';
@@ -85,17 +86,19 @@ export async function buildApp(
   app.setErrorHandler((error, request, reply) => {
     request.log.error({ err: error }, 'Request failed');
     const status =
-      error instanceof Error &&
-      'statusCode' in error &&
-      typeof error.statusCode === 'number' &&
-      error.statusCode >= 400 &&
-      error.statusCode < 500
-        ? error.statusCode
-        : 500;
+      error instanceof ZodError
+        ? 400
+        : error instanceof Error &&
+            'statusCode' in error &&
+            typeof error.statusCode === 'number' &&
+            error.statusCode >= 400 &&
+            error.statusCode < 500
+          ? error.statusCode
+          : 500;
     return reply.code(status).send({
       error: {
         code: status === 500 ? 'INTERNAL_ERROR' : 'BAD_REQUEST',
-        message: status === 500 ? 'Erreur interne.' : 'Requête invalide.',
+        message: status === 500 ? 'Erreur interne.' : 'RequÃªte invalide.',
       },
     });
   });

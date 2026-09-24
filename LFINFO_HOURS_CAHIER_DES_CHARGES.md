@@ -1650,21 +1650,21 @@ milestone(3): implement authentication and authorization
 
 **Objectif :** administration organisationnelle.
 
--   [ ] CRUD Company côté plateforme.
--   [ ] Activation/désactivation Company.
--   [ ] CRUD User côté ADMIN.
--   [ ] Un ADMIN ne gère que sa Company.
--   [ ] Un ADMIN ne peut pas créer un PlatformUser.
--   [ ] CRUD Team.
--   [ ] Affectation User -\> Team.
--   [ ] Affectation Manager -\> Team.
--   [ ] Validation anti-relation cross-tenant.
--   [ ] Interface admin responsive.
--   [ ] Interface plateforme Companies.
--   [ ] Audit des changements sensibles.
--   [ ] Tests direct ID étrangers.
--   [ ] Tests POST manipulés.
--   [ ] Commit du jalon.
+-   [x] CRUD Company côté plateforme.
+-   [x] Activation/désactivation Company.
+-   [x] CRUD User côté ADMIN.
+-   [x] Un ADMIN ne gère que sa Company.
+-   [x] Un ADMIN ne peut pas créer un PlatformUser.
+-   [x] CRUD Team.
+-   [x] Affectation User -\> Team.
+-   [x] Affectation Manager -\> Team.
+-   [x] Validation anti-relation cross-tenant.
+-   [x] Interface admin responsive.
+-   [x] Interface plateforme Companies.
+-   [x] Audit des changements sensibles.
+-   [x] Tests direct ID étrangers.
+-   [x] Tests POST manipulés.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
