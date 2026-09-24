@@ -7,6 +7,7 @@ import { SchedulingService } from '../scheduling/scheduling.service.js';
 import { WorkEntryService } from '../work-entries/work-entry.service.js';
 import { TimeBalanceService } from '../time-balance/time-balance.service.js';
 import { ClockService } from '../clock/clock.service.js';
+import { DashboardService } from '../dashboard/dashboard.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -36,7 +37,7 @@ function unavailable(reply: FastifyReply) {
     error: {
       code: 'AUTH_NOT_CONFIGURED',
       message:
-        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
+        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
     },
   });
 }
@@ -132,7 +133,7 @@ export async function registerAuthRoutes(
           error: {
             code: 'RESET_TOKEN_INVALID',
             message:
-              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
+              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
           },
         });
       return reply.code(204).send();
@@ -204,7 +205,7 @@ export async function registerAuthRoutes(
         error: {
           code: 'FORBIDDEN',
           message:
-            'AccÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s administrateur requis.',
+            'AccÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s administrateur requis.',
         },
       });
     (
@@ -249,6 +250,7 @@ export async function registerAuthRoutes(
   const workEntries = auth ? new WorkEntryService(auth.database) : undefined;
   const balances = auth ? new TimeBalanceService(auth.database) : undefined;
   const clock = auth ? new ClockService(auth.database) : undefined;
+  const dashboard = auth ? new DashboardService(auth.database) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
@@ -651,7 +653,10 @@ export async function registerAuthRoutes(
       return x
         ? reply.code(201).send({ data: { session: x } })
         : reply.code(409).send({
-            error: { code: 'CLOCK_ACTIVE', message: 'Pointage dÃ©jÃ  actif.' },
+            error: {
+              code: 'CLOCK_ACTIVE',
+              message: 'Pointage dÃƒÆ’Ã‚Â©jÃƒÆ’Ã‚Â  actif.',
+            },
           });
     },
   );
@@ -679,7 +684,7 @@ export async function registerAuthRoutes(
         return reply.code(400).send({
           error: {
             code: 'BAD_REQUEST',
-            message: 'Clé idempotence invalide.',
+            message: 'ClÃƒÂ© idempotence invalide.',
           },
         });
       await auth!.database.$transaction(async (tx) => {
@@ -694,25 +699,7 @@ export async function registerAuthRoutes(
       return reply.code(202).send({ data: { synchronized: true } });
     },
   );
-  app.get('/api/dashboard', { preHandler: requireUser }, async (r) => {
-    const c = tenant(r);
-    const entries = await workEntries!.list(c, {});
-    const today = new Date().toISOString().slice(0, 10);
-    const todayEntries = entries.filter(
-      (e) => e.date.toISOString().slice(0, 10) === today,
-    );
-    const pending = entries.filter((e) => e.status === 'SUBMITTED').length;
-    const total = todayEntries.reduce((n, e) => n + e.workedMinutes, 0);
-    const balance = await balances!.balance(c);
-    return {
-      data: {
-        entries: todayEntries,
-        pending,
-        totalMinutes: total,
-        missing: 0,
-        anomalies: todayEntries.filter((e) => e.differenceMinutes !== 0).length,
-        balanceMinutes: balance,
-      },
-    };
-  });
+  app.get('/api/dashboard', { preHandler: requireUser }, async (r) => ({
+    data: await dashboard!.summary(tenant(r)),
+  }));
 }

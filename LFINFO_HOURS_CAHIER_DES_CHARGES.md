@@ -1854,18 +1854,18 @@ milestone(10): implement pwa offline synchronization
 
 **Objectif :** supervision opérationnelle.
 
--   [ ] Vue équipe aujourd'hui.
--   [ ] Présents/encodés.
--   [ ] Prestations manquantes.
--   [ ] Prestations à valider.
--   [ ] Anomalies.
--   [ ] Totaux du jour.
--   [ ] Navigation vers travailleur.
--   [ ] Navigation vers prestation.
--   [ ] Pot d'heures visible selon rôle.
--   [ ] Responsive desktop/tablette.
--   [ ] Tests de permissions.
--   [ ] Commit du jalon.
+-   [x] Vue équipe aujourd'hui.
+-   [x] Présents/encodés.
+-   [x] Prestations manquantes.
+-   [x] Prestations à valider.
+-   [x] Anomalies.
+-   [x] Totaux du jour.
+-   [x] Navigation vers travailleur.
+-   [x] Navigation vers prestation.
+-   [x] Pot d'heures visible selon rôle.
+-   [x] Responsive desktop/tablette.
+-   [x] Tests de permissions.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
