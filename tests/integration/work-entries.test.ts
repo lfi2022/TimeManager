@@ -151,3 +151,39 @@ it('limits a manager to members of managed teams', async () => {
     ).json().data.entry.status,
   ).toBe('APPROVED');
 });
+
+it('prevents a second active clock and converts stop to a work entry', async () => {
+  const admin = await login('secret-company-a', 'admin-a@tempopoint.test');
+  const started = await app.inject({
+    method: 'POST',
+    url: '/api/clock/start',
+    headers: h(admin),
+    payload: {},
+  });
+  expect(started.statusCode).toBe(201);
+  expect(
+    (
+      await app.inject({
+        method: 'POST',
+        url: '/api/clock/start',
+        headers: h(admin),
+        payload: {},
+      })
+    ).statusCode,
+  ).toBe(409);
+  expect(
+    (
+      await app.inject({
+        url: '/api/clock/status',
+        headers: { cookie: admin.session },
+      })
+    ).json().data.session,
+  ).not.toBeNull();
+  const stopped = await app.inject({
+    method: 'POST',
+    url: '/api/clock/stop',
+    headers: h(admin),
+  });
+  expect(stopped.statusCode).toBe(200);
+  expect(stopped.json().data.entry.source).toBe('CLOCK');
+});

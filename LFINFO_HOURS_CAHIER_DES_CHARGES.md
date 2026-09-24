@@ -1796,20 +1796,20 @@ milestone(8): implement time balance ledger
 
 **Objectif :** expérience terrain ultra rapide.
 
--   [ ] `/api/clock/start`.
--   [ ] `/api/clock/stop`.
--   [ ] `/api/clock/status`.
--   [ ] Empêcher plusieurs pointages actifs incompatibles.
--   [ ] Sélection Worksite.
--   [ ] Écran Worker « Débuter ».
--   [ ] Écran Worker « Terminer ».
--   [ ] Confirmation finale.
--   [ ] Pause.
--   [ ] Conversion en WorkEntry.
--   [ ] Calcul backend.
--   [ ] Audit.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] `/api/clock/start`.
+-   [x] `/api/clock/stop`.
+-   [x] `/api/clock/status`.
+-   [x] Empêcher plusieurs pointages actifs incompatibles.
+-   [x] Sélection Worksite.
+-   [x] Écran Worker « Débuter ».
+-   [x] Écran Worker « Terminer ».
+-   [x] Confirmation finale.
+-   [x] Pause.
+-   [x] Conversion en WorkEntry.
+-   [x] Calcul backend.
+-   [x] Audit.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

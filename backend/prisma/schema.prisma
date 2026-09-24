@@ -321,3 +321,14 @@ model TimeBalanceTransaction {
  @@index([companyId,userId,createdAt])
  @@map("TimeBalanceTransaction")
 }
+model ClockSession {
+ id String @id @default(uuid()) @db.Uuid
+ companyId String @db.Uuid
+ userId String @db.Uuid
+ worksiteId String? @db.Uuid
+ startedAt DateTime @db.Timestamptz(6)
+ stoppedAt DateTime? @db.Timestamptz(6)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ @@index([companyId,userId])
+ @@map("ClockSession")
+}
