@@ -3,6 +3,7 @@ import { HomePage } from '../pages/HomePage';
 import { SchedulingPage } from '../pages/SchedulingPage';
 import { WorkEntriesPage } from '../pages/WorkEntriesPage';
 import { ClockPage } from '../pages/ClockPage';
+import { DashboardPage } from '../pages/DashboardPage';
 import {
   AdminOrganizationPage,
   PlatformCompaniesPage,
@@ -16,6 +17,7 @@ export function App() {
       <Route path="/admin/scheduling" element={<SchedulingPage />} />
       <Route path="/work-entries" element={<WorkEntriesPage />} />
       <Route path="/clock" element={<ClockPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
       <Route
         path="*"
         element={

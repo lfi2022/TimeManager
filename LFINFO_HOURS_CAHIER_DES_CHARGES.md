@@ -1823,24 +1823,24 @@ milestone(9): implement worker clock workflow
 
 **Objectif :** fonctionner sur chantier avec réseau instable.
 
--   [ ] Manifest PWA.
--   [ ] Service Worker.
--   [ ] Installation mobile.
--   [ ] Cache du shell applicatif.
--   [ ] IndexedDB/Dexie.
--   [ ] Queue de mutations.
--   [ ] UUID/idempotency key client.
--   [ ] Synchronisation `/api/sync`.
--   [ ] Retry.
--   [ ] État « en attente de synchronisation ».
--   [ ] État offline visible.
--   [ ] Détection de conflit.
--   [ ] Aucun écrasement silencieux.
--   [ ] Test coupure réseau.
--   [ ] Test double envoi.
--   [ ] Test reconnexion.
--   [ ] Tests E2E PWA pertinents.
--   [ ] Commit du jalon.
+-   [x] Manifest PWA.
+-   [x] Service Worker.
+-   [x] Installation mobile.
+-   [x] Cache du shell applicatif.
+-   [x] IndexedDB/Dexie.
+-   [x] Queue de mutations.
+-   [x] UUID/idempotency key client.
+-   [x] Synchronisation `/api/sync`.
+-   [x] Retry.
+-   [x] État « en attente de synchronisation ».
+-   [x] État offline visible.
+-   [x] Détection de conflit.
+-   [x] Aucun écrasement silencieux.
+-   [x] Test coupure réseau.
+-   [x] Test double envoi.
+-   [x] Test reconnexion.
+-   [x] Tests E2E PWA pertinents.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

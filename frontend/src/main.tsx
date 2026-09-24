@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
 import { App } from './app/App';
 import './styles.css';
+if ('serviceWorker' in navigator)
+  void navigator.serviceWorker.register('/sw.js');
+if ('serviceWorker' in navigator)
+  void navigator.serviceWorker.register('/sw.js');
 const queryClient = new QueryClient();
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing application root');

@@ -36,7 +36,7 @@ function unavailable(reply: FastifyReply) {
     error: {
       code: 'AUTH_NOT_CONFIGURED',
       message:
-        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
+        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
     },
   });
 }
@@ -132,7 +132,7 @@ export async function registerAuthRoutes(
           error: {
             code: 'RESET_TOKEN_INVALID',
             message:
-              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
+              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
           },
         });
       return reply.code(204).send();
@@ -203,7 +203,8 @@ export async function registerAuthRoutes(
       return reply.code(403).send({
         error: {
           code: 'FORBIDDEN',
-          message: 'AccÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¨s administrateur requis.',
+          message:
+            'AccÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s administrateur requis.',
         },
       });
     (
@@ -650,7 +651,7 @@ export async function registerAuthRoutes(
       return x
         ? reply.code(201).send({ data: { session: x } })
         : reply.code(409).send({
-            error: { code: 'CLOCK_ACTIVE', message: 'Pointage déjà actif.' },
+            error: { code: 'CLOCK_ACTIVE', message: 'Pointage dÃ©jÃ  actif.' },
           });
     },
   );
@@ -669,4 +670,49 @@ export async function registerAuthRoutes(
           });
     },
   );
+  app.post(
+    '/api/sync',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const key = r.headers['idempotency-key'];
+      if (typeof key !== 'string' || !/^[A-Za-z0-9_-]{16,}$/.test(key))
+        return reply.code(400).send({
+          error: {
+            code: 'BAD_REQUEST',
+            message: 'Clé idempotence invalide.',
+          },
+        });
+      await auth!.database.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe(
+          'INSERT INTO "SyncMutation" ("id","companyId","userId","payload") VALUES ($1::uuid,$2::uuid,$3::uuid,$4::jsonb) ON CONFLICT ("id") DO NOTHING',
+          key,
+          tenant(r).companyId,
+          tenant(r).userId,
+          JSON.stringify(r.body),
+        );
+      });
+      return reply.code(202).send({ data: { synchronized: true } });
+    },
+  );
+  app.get('/api/dashboard', { preHandler: requireUser }, async (r) => {
+    const c = tenant(r);
+    const entries = await workEntries!.list(c, {});
+    const today = new Date().toISOString().slice(0, 10);
+    const todayEntries = entries.filter(
+      (e) => e.date.toISOString().slice(0, 10) === today,
+    );
+    const pending = entries.filter((e) => e.status === 'SUBMITTED').length;
+    const total = todayEntries.reduce((n, e) => n + e.workedMinutes, 0);
+    const balance = await balances!.balance(c);
+    return {
+      data: {
+        entries: todayEntries,
+        pending,
+        totalMinutes: total,
+        missing: 0,
+        anomalies: todayEntries.filter((e) => e.differenceMinutes !== 0).length,
+        balanceMinutes: balance,
+      },
+    };
+  });
 }
