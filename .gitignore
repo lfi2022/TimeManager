@@ -1,0 +1,35 @@
+# Dependencies and generated builds
+node_modules/
+.pnpm-store/
+dist/
+build/
+*.tsbuildinfo
+
+# Local environment and secrets (templates remain versioned)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs and test artifacts
+*.log
+logs/
+coverage/
+playwright-report/
+test-results/
+
+# Local database dumps and backups
+*.sql.gz
+*.dump
+backups/
+
+# Editor and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
