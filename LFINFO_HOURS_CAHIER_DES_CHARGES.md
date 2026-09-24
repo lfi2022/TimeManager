@@ -1678,19 +1678,19 @@ milestone(4): implement companies users and teams
 
 **Objectif :** définir où et combien le personnel est censé travailler.
 
--   [ ] CRUD Worksite.
--   [ ] Archivage Worksite.
--   [ ] CRUD Schedule.
--   [ ] ScheduleDay.
--   [ ] Affectation historique UserScheduleAssignment.
--   [ ] Calcul du temps attendu par jour.
--   [ ] Gestion timezone entreprise.
--   [ ] Interface chantiers.
--   [ ] Interface horaires.
--   [ ] Isolation tenant.
--   [ ] Audit.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] CRUD Worksite.
+-   [x] Archivage Worksite.
+-   [x] CRUD Schedule.
+-   [x] ScheduleDay.
+-   [x] Affectation historique UserScheduleAssignment.
+-   [x] Calcul du temps attendu par jour.
+-   [x] Gestion timezone entreprise.
+-   [x] Interface chantiers.
+-   [x] Interface horaires.
+-   [x] Isolation tenant.
+-   [x] Audit.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

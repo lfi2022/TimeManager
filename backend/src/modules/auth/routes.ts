@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { AuthService } from './auth.service.js';
 import { createTenantContextFromIdentity } from '../../tenancy/context.js';
 import { OrganizationService } from '../organization/organization.service.js';
+import { SchedulingService } from '../scheduling/scheduling.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -187,20 +188,16 @@ export async function registerAuthRoutes(
     if (!auth || !organizationService) return unavailable(reply);
     const session = await auth.userSession(request.cookies[sessionCookie]);
     if (!session)
-      return reply
-        .code(401)
-        .send({
-          error: {
-            code: 'UNAUTHENTICATED',
-            message: 'Authentification requise.',
-          },
-        });
+      return reply.code(401).send({
+        error: {
+          code: 'UNAUTHENTICATED',
+          message: 'Authentification requise.',
+        },
+      });
     if (session.identity.role !== 'ADMIN')
-      return reply
-        .code(403)
-        .send({
-          error: { code: 'FORBIDDEN', message: 'Accès administrateur requis.' },
-        });
+      return reply.code(403).send({
+        error: { code: 'FORBIDDEN', message: 'Accès administrateur requis.' },
+      });
     (
       request as FastifyRequest & {
         tenantContext?: ReturnType<typeof createTenantContextFromIdentity>;
@@ -220,14 +217,12 @@ export async function registerAuthRoutes(
       request.cookies[platformSessionCookie],
     );
     if (!session)
-      return reply
-        .code(401)
-        .send({
-          error: {
-            code: 'UNAUTHENTICATED',
-            message: 'Authentification requise.',
-          },
-        });
+      return reply.code(401).send({
+        error: {
+          code: 'UNAUTHENTICATED',
+          message: 'Authentification requise.',
+        },
+      });
     (request as FastifyRequest & { platformUserId?: string }).platformUserId =
       session.identity.id;
   };
@@ -239,12 +234,13 @@ export async function registerAuthRoutes(
     ).tenantContext;
   const platformUserId = (request: FastifyRequest) =>
     (request as FastifyRequest & { platformUserId: string }).platformUserId;
+  const schedulingService = auth
+    ? new SchedulingService(auth.database)
+    : undefined;
   const notFound = (reply: FastifyReply) =>
-    reply
-      .code(404)
-      .send({
-        error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
-      });
+    reply.code(404).send({
+      error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
+    });
 
   app.get(
     '/api/platform/companies',
@@ -257,16 +253,14 @@ export async function registerAuthRoutes(
     '/api/platform/companies',
     { preHandler: [requireCsrf, requirePlatform] },
     async (request, reply) =>
-      reply
-        .code(201)
-        .send({
-          data: {
-            company: await organizationService!.createCompany(
-              platformUserId(request),
-              request.body,
-            ),
-          },
-        }),
+      reply.code(201).send({
+        data: {
+          company: await organizationService!.createCompany(
+            platformUserId(request),
+            request.body,
+          ),
+        },
+      }),
   );
   app.patch(
     '/api/platform/companies/:id',
@@ -327,16 +321,14 @@ export async function registerAuthRoutes(
     '/api/admin/users',
     { preHandler: [requireCsrf, requireAdmin] },
     async (request, reply) =>
-      reply
-        .code(201)
-        .send({
-          data: {
-            user: await organizationService!.createUser(
-              tenant(request),
-              request.body,
-            ),
-          },
-        }),
+      reply.code(201).send({
+        data: {
+          user: await organizationService!.createUser(
+            tenant(request),
+            request.body,
+          ),
+        },
+      }),
   );
   app.patch(
     '/api/admin/users/:id',
@@ -373,16 +365,14 @@ export async function registerAuthRoutes(
     '/api/admin/teams',
     { preHandler: [requireCsrf, requireAdmin] },
     async (request, reply) =>
-      reply
-        .code(201)
-        .send({
-          data: {
-            team: await organizationService!.createTeam(
-              tenant(request),
-              request.body,
-            ),
-          },
-        }),
+      reply.code(201).send({
+        data: {
+          team: await organizationService!.createTeam(
+            tenant(request),
+            request.body,
+          ),
+        },
+      }),
   );
   app.patch(
     '/api/admin/teams/:id',
@@ -431,6 +421,100 @@ export async function registerAuthRoutes(
         (request.params as { userId: string }).userId,
       );
       return removed ? reply.code(204).send() : notFound(reply);
+    },
+  );
+  app.get('/api/admin/worksites', { preHandler: requireAdmin }, async (r) => ({
+    data: { worksites: await schedulingService!.worksites(tenant(r)) },
+  }));
+  app.post(
+    '/api/admin/worksites',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) => {
+      const x = await schedulingService!.saveWorksite(
+        tenant(r),
+        undefined,
+        r.body,
+      );
+      return reply.code(201).send({ data: { worksite: x } });
+    },
+  );
+  app.patch(
+    '/api/admin/worksites/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) => {
+      const x = await schedulingService!.saveWorksite(
+        tenant(r),
+        (r.params as { id: string }).id,
+        r.body,
+      );
+      return x ? { data: { worksite: x } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/admin/worksites/:id/archive',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) => {
+      const x = await schedulingService!.archiveWorksite(
+        tenant(r),
+        (r.params as { id: string }).id,
+      );
+      return x ? { data: { worksite: x } } : notFound(reply);
+    },
+  );
+  app.get('/api/admin/schedules', { preHandler: requireAdmin }, async (r) => ({
+    data: { schedules: await schedulingService!.schedules(tenant(r)) },
+  }));
+  app.post(
+    '/api/admin/schedules',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) =>
+      reply.code(201).send({
+        data: {
+          schedule: await schedulingService!.saveSchedule(
+            tenant(r),
+            undefined,
+            r.body,
+          ),
+        },
+      }),
+  );
+  app.patch(
+    '/api/admin/schedules/:id',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) => {
+      const x = await schedulingService!.saveSchedule(
+        tenant(r),
+        (r.params as { id: string }).id,
+        r.body,
+      );
+      return x ? { data: { schedule: x } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/admin/schedule-assignments',
+    { preHandler: [requireCsrf, requireAdmin] },
+    async (r, reply) => {
+      const x = await schedulingService!.assign(tenant(r), r.body);
+      return x
+        ? reply.code(201).send({ data: { assignment: x } })
+        : notFound(reply);
+    },
+  );
+  app.get(
+    '/api/admin/users/:id/expected-minutes',
+    { preHandler: requireAdmin },
+    async (r, reply) => {
+      const date = new Date(String((r.query as { date?: string }).date));
+      if (Number.isNaN(date.getTime()))
+        return reply
+          .code(400)
+          .send({ error: { code: 'BAD_REQUEST', message: 'Date invalide.' } });
+      const x = await schedulingService!.expectedMinutes(
+        tenant(r),
+        (r.params as { id: string }).id,
+        date,
+      );
+      return x ? { data: x } : notFound(reply);
     },
   );
 }
