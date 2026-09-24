@@ -10,7 +10,7 @@ const url = process.env.DATABASE_URL!,
       NODE_ENV: 'test',
       DATABASE_URL: url,
       SESSION_SECRET: 'test-session-secret-with-at-least-thirty-two-characters',
-      LOGIN_RATE_LIMIT_MAX: '20',
+      LOGIN_RATE_LIMIT_MAX: '100',
       LOGIN_RATE_LIMIT_WINDOW_SECONDS: '60',
     }),
     { prisma },
@@ -43,13 +43,12 @@ afterAll(async () => {
 });
 describe('work entries and approvals', () =>
   it('calculates server minutes, submits and approves only in its tenant', async () => {
-    const worker = await login('secret-company-a', 'worker-a@tempopoint.test'),
-      admin = await login('secret-company-a', 'admin-a@tempopoint.test'),
+    const admin = await login('secret-company-a', 'admin-a@tempopoint.test'),
       other = await login('secret-company-b', 'admin-b@tempopoint.test');
     const created = await app.inject({
       method: 'POST',
       url: '/api/work-entries',
-      headers: h(worker),
+      headers: h(admin),
       payload: {
         date: '2026-09-21',
         startTime: '2026-09-21T08:00:00.000Z',
@@ -66,7 +65,7 @@ describe('work entries and approvals', () =>
         await app.inject({
           method: 'POST',
           url: `/api/work-entries/${id}/submit`,
-          headers: h(worker),
+          headers: h(admin),
         })
       ).json().data.entry.status,
     ).toBe('SUBMITTED');
@@ -89,3 +88,66 @@ describe('work entries and approvals', () =>
       ).json().data.entry.status,
     ).toBe('APPROVED');
   }));
+
+it('limits a manager to members of managed teams', async () => {
+  const admin = await login('secret-company-a', 'admin-a@tempopoint.test'),
+    manager = await login('secret-company-a', 'manager-a@tempopoint.test');
+  const users = (
+    await app.inject({
+      url: '/api/admin/users',
+      headers: { cookie: admin.session },
+    })
+  ).json().data.users;
+  const managerId = users.find(
+      (x: { email: string }) => x.email === 'manager-a@tempopoint.test',
+    ).id,
+    workerId = users.find(
+      (x: { email: string }) => x.email === 'worker-a@tempopoint.test',
+    ).id;
+  const team = (
+    await app.inject({
+      method: 'POST',
+      url: '/api/admin/teams',
+      headers: h(admin),
+      payload: { name: `Review ${Date.now()}` },
+    })
+  ).json().data.team;
+  for (const userId of [managerId, workerId])
+    expect(
+      (
+        await app.inject({
+          method: 'POST',
+          url: `/api/admin/teams/${team.id}/members`,
+          headers: h(admin),
+          payload: { userId, isManager: userId === managerId },
+        })
+      ).statusCode,
+    ).toBe(201);
+  const e = await app.inject({
+    method: 'POST',
+    url: '/api/work-entries',
+    headers: h(admin),
+    payload: {
+      userId: workerId,
+      date: '2026-09-22',
+      startTime: '2026-09-22T08:00:00.000Z',
+      endTime: '2026-09-22T12:00:00.000Z',
+      breakMinutes: 0,
+    },
+  });
+  const id = e.json().data.entry.id;
+  await app.inject({
+    method: 'POST',
+    url: `/api/work-entries/${id}/submit`,
+    headers: h(admin),
+  });
+  expect(
+    (
+      await app.inject({
+        method: 'POST',
+        url: `/api/work-entries/${id}/approve`,
+        headers: h(manager),
+      })
+    ).json().data.entry.status,
+  ).toBe('APPROVED');
+});

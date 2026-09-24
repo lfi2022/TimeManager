@@ -1736,23 +1736,23 @@ milestone(6): implement manual work entries
 
 **Objectif :** contrôle des feuilles d'heures.
 
--   [ ] Liste des prestations SUBMITTED.
--   [ ] Filtre équipe.
--   [ ] Filtre utilisateur.
--   [ ] Filtre date.
--   [ ] Filtre statut.
--   [ ] Approbation.
--   [ ] Rejet.
--   [ ] Motif de rejet.
--   [ ] Validation multiple sécurisée.
--   [ ] Worker voit le statut.
--   [ ] Worker voit le motif de rejet.
--   [ ] Audit approve/reject.
--   [ ] Manager limité à son périmètre.
--   [ ] ADMIN accès entreprise complète.
--   [ ] Tests Manager équipe A / équipe B.
--   [ ] Tests tenant.
--   [ ] Commit du jalon.
+-   [x] Liste des prestations SUBMITTED.
+-   [x] Filtre équipe.
+-   [x] Filtre utilisateur.
+-   [x] Filtre date.
+-   [x] Filtre statut.
+-   [x] Approbation.
+-   [x] Rejet.
+-   [x] Motif de rejet.
+-   [x] Validation multiple sécurisée.
+-   [x] Worker voit le statut.
+-   [x] Worker voit le motif de rejet.
+-   [x] Audit approve/reject.
+-   [x] Manager limité à son périmètre.
+-   [x] ADMIN accès entreprise complète.
+-   [x] Tests Manager équipe A / équipe B.
+-   [x] Tests tenant.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

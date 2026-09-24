@@ -197,7 +197,10 @@ export async function registerAuthRoutes(
       });
     if (session.identity.role !== 'ADMIN')
       return reply.code(403).send({
-        error: { code: 'FORBIDDEN', message: 'AccÃƒÂ¨s administrateur requis.' },
+        error: {
+          code: 'FORBIDDEN',
+          message: 'AccÃƒÂ¨s administrateur requis.',
+        },
       });
     (
       request as FastifyRequest & {
@@ -523,14 +526,12 @@ export async function registerAuthRoutes(
     if (!auth || !workEntries) return unavailable(reply);
     const session = await auth.userSession(request.cookies[sessionCookie]);
     if (!session)
-      return reply
-        .code(401)
-        .send({
-          error: {
-            code: 'UNAUTHENTICATED',
-            message: 'Authentification requise.',
-          },
-        });
+      return reply.code(401).send({
+        error: {
+          code: 'UNAUTHENTICATED',
+          message: 'Authentification requise.',
+        },
+      });
     (
       request as FastifyRequest & {
         tenantContext?: ReturnType<typeof createTenantContextFromIdentity>;
@@ -545,7 +546,12 @@ export async function registerAuthRoutes(
     data: {
       entries: await workEntries!.list(
         tenant(r),
-        r.query as { status?: never; userId?: string; teamId?: string; date?: string },
+        r.query as {
+          status?: never;
+          userId?: string;
+          teamId?: string;
+          date?: string;
+        },
       ),
     },
   }));
