@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TimeBalanceType {
+  OVERTIME
+  RECOVERY
+  MANUAL_ADJUSTMENT
+  CORRECTION
+  OPENING_BALANCE
+}
+
 enum WorkEntryStatus {
   DRAFT
   SUBMITTED
@@ -45,6 +53,7 @@ model Company {
   auditEvents         AuditEvent[]
   worksites           Worksite[]
   workEntries WorkEntry[]
+  balanceTransactions TimeBalanceTransaction[]
   schedules           Schedule[]
   scheduleDays        ScheduleDay[]
   scheduleAssignments UserScheduleAssignment[]
@@ -89,6 +98,7 @@ model User {
   auditEvents         AuditEvent[]
   scheduleAssignments UserScheduleAssignment[]
   workEntries WorkEntry[] @relation("WorkEntryUser")
+  balanceTransactions TimeBalanceTransaction[]
   @@unique([companyId, email])
   @@index([companyId])
   @@map("User")
@@ -266,6 +276,7 @@ model WorkEntry {
  companyId String @db.Uuid
  userId String @db.Uuid
  worksiteId String? @db.Uuid
+  balanceTransactions TimeBalanceTransaction[]
  date DateTime @db.Date
  startTime DateTime? @db.Timestamptz(6)
  endTime DateTime? @db.Timestamptz(6)
@@ -291,4 +302,22 @@ model WorkEntry {
  worksite Worksite? @relation(fields:[worksiteId],references:[id],onDelete:SetNull)
  @@index([companyId,userId,date])
  @@map("WorkEntry")
+}
+
+model TimeBalanceTransaction {
+ id String @id @default(uuid()) @db.Uuid
+ companyId String @db.Uuid
+ userId String @db.Uuid
+ workEntryId String? @db.Uuid
+ minutes Int
+ type TimeBalanceType
+ reason String?
+ createdByUserId String? @db.Uuid
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ workEntry WorkEntry? @relation(fields:[workEntryId],references:[id],onDelete:SetNull)
+ @@unique([workEntryId,type])
+ @@index([companyId,userId,createdAt])
+ @@map("TimeBalanceTransaction")
 }

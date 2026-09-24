@@ -1766,23 +1766,23 @@ milestone(7): implement work entry approval workflow
 
 **Objectif :** ledger fiable et auditable.
 
--   [ ] Créer TimeBalanceTransaction.
--   [ ] Générer OVERTIME selon règles V1.
--   [ ] Support RECOVERY.
--   [ ] Support OPENING_BALANCE.
--   [ ] Support MANUAL_ADJUSTMENT.
--   [ ] Support CORRECTION.
--   [ ] Calcul du solde par SUM.
--   [ ] Historique Worker.
--   [ ] Historique Manager/Admin selon permissions.
--   [ ] Motif obligatoire pour ajustement.
--   [ ] Acteur enregistré.
--   [ ] Ne jamais écraser silencieusement l'historique.
--   [ ] Idempotence des transactions générées depuis WorkEntry.
--   [ ] Recalcul/correction maîtrisé lors d'une modification autorisée.
--   [ ] Tests comptables du ledger.
--   [ ] Tests tenant.
--   [ ] Commit du jalon.
+-   [x] Créer TimeBalanceTransaction.
+-   [x] Générer OVERTIME selon règles V1.
+-   [x] Support RECOVERY.
+-   [x] Support OPENING_BALANCE.
+-   [x] Support MANUAL_ADJUSTMENT.
+-   [x] Support CORRECTION.
+-   [x] Calcul du solde par SUM.
+-   [x] Historique Worker.
+-   [x] Historique Manager/Admin selon permissions.
+-   [x] Motif obligatoire pour ajustement.
+-   [x] Acteur enregistré.
+-   [x] Ne jamais écraser silencieusement l'historique.
+-   [x] Idempotence des transactions générées depuis WorkEntry.
+-   [x] Recalcul/correction maîtrisé lors d'une modification autorisée.
+-   [x] Tests comptables du ledger.
+-   [x] Tests tenant.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

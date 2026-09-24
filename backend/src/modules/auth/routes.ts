@@ -5,6 +5,7 @@ import { createTenantContextFromIdentity } from '../../tenancy/context.js';
 import { OrganizationService } from '../organization/organization.service.js';
 import { SchedulingService } from '../scheduling/scheduling.service.js';
 import { WorkEntryService } from '../work-entries/work-entry.service.js';
+import { TimeBalanceService } from '../time-balance/time-balance.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -33,7 +34,7 @@ function unavailable(reply: FastifyReply) {
   return reply.code(503).send({
     error: {
       code: 'AUTH_NOT_CONFIGURED',
-      message: 'Authentification non configurÃƒÆ’Ã‚Â©e.',
+      message: 'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©e.',
     },
   });
 }
@@ -128,7 +129,7 @@ export async function registerAuthRoutes(
         return reply.code(400).send({
           error: {
             code: 'RESET_TOKEN_INVALID',
-            message: 'Jeton invalide ou expirÃƒÆ’Ã‚Â©.',
+            message: 'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©.',
           },
         });
       return reply.code(204).send();
@@ -199,7 +200,7 @@ export async function registerAuthRoutes(
       return reply.code(403).send({
         error: {
           code: 'FORBIDDEN',
-          message: 'AccÃƒÂ¨s administrateur requis.',
+          message: 'AccÃƒÆ’Ã‚Â¨s administrateur requis.',
         },
       });
     (
@@ -242,6 +243,7 @@ export async function registerAuthRoutes(
     ? new SchedulingService(auth.database)
     : undefined;
   const workEntries = auth ? new WorkEntryService(auth.database) : undefined;
+  const balances = auth ? new TimeBalanceService(auth.database) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
@@ -610,5 +612,6 @@ export async function registerAuthRoutes(
       );
       return x ? { data: { entry: x } } : notFound(reply);
     },
-  );
+  );  app.get('/api/time-balance',{preHandler:requireUser},async r=>({data:{minutes:await balances!.balance(tenant(r),(r.query as {userId?:string}).userId),transactions:await balances!.history(tenant(r),(r.query as {userId?:string}).userId)}}));
+  app.post('/api/admin/time-balance/adjust',{preHandler:[requireCsrf,requireAdmin]},async(r,reply)=>{const x=await balances!.adjust(tenant(r),r.body);return x?reply.code(201).send({data:{transaction:x}}):notFound(reply)});
 }
