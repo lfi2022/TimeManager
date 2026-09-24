@@ -1704,25 +1704,25 @@ milestone(5): implement worksites and schedules
 
 **Objectif :** premier workflow métier complet.
 
--   [ ] Créer WorkEntry.
--   [ ] Édition DRAFT.
--   [ ] Calcul minutes travaillées backend.
--   [ ] Calcul minutes prévues backend.
--   [ ] Calcul différence backend.
--   [ ] Gestion pause.
--   [ ] Association Worksite.
--   [ ] Note.
--   [ ] Historique personnel.
--   [ ] Soumission.
--   [ ] Validation des transitions de statut.
--   [ ] Vue Worker mobile-first.
--   [ ] Vue Manager.
--   [ ] ADMIN peut encoder/corriger selon règles.
--   [ ] Contrôles de dates/heures.
--   [ ] Isolation tenant.
--   [ ] Tests métier.
--   [ ] Tests sécurité.
--   [ ] Commit du jalon.
+-   [x] Créer WorkEntry.
+-   [x] Édition DRAFT.
+-   [x] Calcul minutes travaillées backend.
+-   [x] Calcul minutes prévues backend.
+-   [x] Calcul différence backend.
+-   [x] Gestion pause.
+-   [x] Association Worksite.
+-   [x] Note.
+-   [x] Historique personnel.
+-   [x] Soumission.
+-   [x] Validation des transitions de statut.
+-   [x] Vue Worker mobile-first.
+-   [x] Vue Manager.
+-   [x] ADMIN peut encoder/corriger selon règles.
+-   [x] Contrôles de dates/heures.
+-   [x] Isolation tenant.
+-   [x] Tests métier.
+-   [x] Tests sécurité.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

@@ -4,6 +4,7 @@ import type { AuthService } from './auth.service.js';
 import { createTenantContextFromIdentity } from '../../tenancy/context.js';
 import { OrganizationService } from '../organization/organization.service.js';
 import { SchedulingService } from '../scheduling/scheduling.service.js';
+import { WorkEntryService } from '../work-entries/work-entry.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -32,7 +33,7 @@ function unavailable(reply: FastifyReply) {
   return reply.code(503).send({
     error: {
       code: 'AUTH_NOT_CONFIGURED',
-      message: 'Authentification non configurÃ©e.',
+      message: 'Authentification non configurÃƒÆ’Ã‚Â©e.',
     },
   });
 }
@@ -127,7 +128,7 @@ export async function registerAuthRoutes(
         return reply.code(400).send({
           error: {
             code: 'RESET_TOKEN_INVALID',
-            message: 'Jeton invalide ou expirÃ©.',
+            message: 'Jeton invalide ou expirÃƒÆ’Ã‚Â©.',
           },
         });
       return reply.code(204).send();
@@ -196,7 +197,7 @@ export async function registerAuthRoutes(
       });
     if (session.identity.role !== 'ADMIN')
       return reply.code(403).send({
-        error: { code: 'FORBIDDEN', message: 'Accès administrateur requis.' },
+        error: { code: 'FORBIDDEN', message: 'AccÃƒÂ¨s administrateur requis.' },
       });
     (
       request as FastifyRequest & {
@@ -237,6 +238,7 @@ export async function registerAuthRoutes(
   const schedulingService = auth
     ? new SchedulingService(auth.database)
     : undefined;
+  const workEntries = auth ? new WorkEntryService(auth.database) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
@@ -515,6 +517,92 @@ export async function registerAuthRoutes(
         date,
       );
       return x ? { data: x } : notFound(reply);
+    },
+  );
+  const requireUser = async (request: FastifyRequest, reply: FastifyReply) => {
+    if (!auth || !workEntries) return unavailable(reply);
+    const session = await auth.userSession(request.cookies[sessionCookie]);
+    if (!session)
+      return reply
+        .code(401)
+        .send({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentification requise.',
+          },
+        });
+    (
+      request as FastifyRequest & {
+        tenantContext?: ReturnType<typeof createTenantContextFromIdentity>;
+      }
+    ).tenantContext = createTenantContextFromIdentity({
+      userId: session.identity.id,
+      companyId: session.identity.companyId,
+      role: session.identity.role,
+    });
+  };
+  app.get('/api/work-entries', { preHandler: requireUser }, async (r) => ({
+    data: {
+      entries: await workEntries!.list(
+        tenant(r),
+        r.query as { status?: never; userId?: string; teamId?: string; date?: string },
+      ),
+    },
+  }));
+  app.post(
+    '/api/work-entries',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const x = await workEntries!.create(tenant(r), r.body);
+      return x ? reply.code(201).send({ data: { entry: x } }) : notFound(reply);
+    },
+  );
+  app.patch(
+    '/api/work-entries/:id',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const x = await workEntries!.update(
+        tenant(r),
+        (r.params as { id: string }).id,
+        r.body,
+      );
+      return x ? { data: { entry: x } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/work-entries/:id/submit',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const x = await workEntries!.submit(
+        tenant(r),
+        (r.params as { id: string }).id,
+      );
+      return x ? { data: { entry: x } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/work-entries/:id/approve',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const x = await workEntries!.decide(
+        tenant(r),
+        (r.params as { id: string }).id,
+        true,
+      );
+      return x ? { data: { entry: x } } : notFound(reply);
+    },
+  );
+  app.post(
+    '/api/work-entries/:id/reject',
+    { preHandler: [requireCsrf, requireUser] },
+    async (r, reply) => {
+      const x = await workEntries!.decide(
+        tenant(r),
+        (r.params as { id: string }).id,
+        false,
+        (r.body as { reason?: string }).reason,
+      );
+      return x ? { data: { entry: x } } : notFound(reply);
     },
   );
 }

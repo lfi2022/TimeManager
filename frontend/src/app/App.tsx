@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router';
 import { HomePage } from '../pages/HomePage';
 import { SchedulingPage } from '../pages/SchedulingPage';
+import { WorkEntriesPage } from '../pages/WorkEntriesPage';
 import {
   AdminOrganizationPage,
   PlatformCompaniesPage,
@@ -12,6 +13,7 @@ export function App() {
       <Route path="/admin/organization" element={<AdminOrganizationPage />} />
       <Route path="/platform/companies" element={<PlatformCompaniesPage />} />
       <Route path="/admin/scheduling" element={<SchedulingPage />} />
+      <Route path="/work-entries" element={<WorkEntriesPage />} />
       <Route
         path="*"
         element={

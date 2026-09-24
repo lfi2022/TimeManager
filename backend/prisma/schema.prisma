@@ -7,6 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum WorkEntryStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  LOCKED
+}
+
+enum WorkEntrySource {
+  MANUAL
+  CLOCK
+  OFFLINE_SYNC
+  MANAGER
+  IMPORT
+}
+
 enum CompanyRole {
   ADMIN
   MANAGER
@@ -28,6 +44,7 @@ model Company {
   teams               Team[]
   auditEvents         AuditEvent[]
   worksites           Worksite[]
+  workEntries WorkEntry[]
   schedules           Schedule[]
   scheduleDays        ScheduleDay[]
   scheduleAssignments UserScheduleAssignment[]
@@ -71,7 +88,7 @@ model User {
   teamMemberships     TeamMember[]
   auditEvents         AuditEvent[]
   scheduleAssignments UserScheduleAssignment[]
-
+  workEntries WorkEntry[] @relation("WorkEntryUser")
   @@unique([companyId, email])
   @@index([companyId])
   @@map("User")
@@ -195,6 +212,7 @@ model Worksite {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workEntries WorkEntry[]
   @@unique([companyId, name])
   @@index([companyId])
   @@map("Worksite")
@@ -242,4 +260,35 @@ model UserScheduleAssignment {
   schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   @@index([companyId, userId, validFrom])
   @@map("UserScheduleAssignment")
+}
+model WorkEntry {
+ id String @id @default(uuid()) @db.Uuid
+ companyId String @db.Uuid
+ userId String @db.Uuid
+ worksiteId String? @db.Uuid
+ date DateTime @db.Date
+ startTime DateTime? @db.Timestamptz(6)
+ endTime DateTime? @db.Timestamptz(6)
+ breakMinutes Int @default(0)
+ workedMinutes Int
+ expectedMinutes Int
+ differenceMinutes Int
+ status WorkEntryStatus @default(DRAFT)
+ note String?
+ source WorkEntrySource @default(MANUAL)
+ createdByUserId String? @db.Uuid
+ updatedByUserId String? @db.Uuid
+ submittedAt DateTime? @db.Timestamptz(6)
+ approvedAt DateTime? @db.Timestamptz(6)
+ approvedByUserId String? @db.Uuid
+ rejectedAt DateTime? @db.Timestamptz(6)
+ rejectedByUserId String? @db.Uuid
+ rejectionReason String?
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt DateTime @updatedAt @db.Timestamptz(6)
+ company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)
+ user User @relation("WorkEntryUser",fields:[userId],references:[id],onDelete:Cascade)
+ worksite Worksite? @relation(fields:[worksiteId],references:[id],onDelete:SetNull)
+ @@index([companyId,userId,date])
+ @@map("WorkEntry")
 }
