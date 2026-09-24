@@ -250,6 +250,22 @@ export class WorkEntryService {
             },
       }),
     );
+    if (approve && entry.differenceMinutes !== 0)
+      await withTenant(this.prisma, c, (tx) =>
+        tx.timeBalanceTransaction.upsert({
+          where: { workEntryId_type: { workEntryId: id, type: 'OVERTIME' } },
+          update: {},
+          create: {
+            companyId: c.companyId,
+            userId: entry.userId,
+            workEntryId: id,
+            minutes: entry.differenceMinutes,
+            type: 'OVERTIME',
+            reason: 'Prestation approuvée',
+            createdByUserId: c.userId,
+          },
+        }),
+      );
     await this.audit(
       c,
       approve ? 'WORK_ENTRY_APPROVED' : 'WORK_ENTRY_REJECTED',
