@@ -164,9 +164,9 @@ export class OrganizationService {
     input: unknown,
   ) {
     const patch = z
-      .object({ active: z.boolean().optional(), role: z.enum(['ADMIN', 'MANAGER', 'WORKER']).optional() })
+      .object({ active: z.boolean().optional(), role: z.enum(['ADMIN', 'MANAGER', 'WORKER']).optional(), password: z.string().min(12).max(1024).optional(), forcePasswordChange: z.boolean().optional() })
       .strict()
-      .refine((value) => value.active !== undefined || value.role !== undefined)
+      .refine((value) => value.active !== undefined || value.role !== undefined || value.password !== undefined || value.forcePasswordChange !== undefined)
       .parse(input);
     const result = await withCompanyId(this.prisma, companyId, async (tx) => {
       const user = await tx.user.findFirst({ where: { id: userId, companyId } });
@@ -181,10 +181,10 @@ export class OrganizationService {
       }
       const updated = await tx.user.update({
         where: { id: userId },
-        data: { active, role },
+        data: { active, role, ...(patch.password ? { passwordHash: await hashPassword(patch.password), forcePasswordChange: patch.forcePasswordChange ?? false } : {}) },
         select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true },
       });
-      if (!active)
+      if (!active || patch.password)
         await tx.userSession.updateMany({
           where: { companyId, userId, invalidatedAt: null },
           data: { invalidatedAt: new Date() },

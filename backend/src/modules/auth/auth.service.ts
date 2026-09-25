@@ -34,6 +34,7 @@ type UserIdentity = {
   firstName: string;
   lastName: string;
   role: CompanyRole;
+  forcePasswordChange: boolean;
 };
 type PlatformIdentity = { id: string; email: string };
 
@@ -182,6 +183,17 @@ export class AuthService {
     };
   }
 
+  async changePasswordFromSession(token: string | undefined, password: string) {
+    this.assertPassword(password);
+    const current = await this.userSession(token);
+    if (!current) return false;
+    return withCompanyId(this.prisma, current.identity.companyId, async (transaction) => {
+      await transaction.user.update({ where: { id: current.identity.id }, data: { passwordHash: await hashPassword(password), forcePasswordChange: false } });
+      await transaction.userSession.updateMany({ where: { userId: current.identity.id, invalidatedAt: null }, data: { invalidatedAt: new Date() } });
+      return true;
+    });
+  }
+
   async logoutUser(token: string | undefined) {
     const current = await this.userSession(token);
     if (current)
@@ -292,6 +304,7 @@ export class AuthService {
     firstName: string;
     lastName: string;
     role: CompanyRole;
+    forcePasswordChange: boolean;
   }): UserIdentity {
     return {
       id: user.id,
@@ -300,6 +313,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+      forcePasswordChange: user.forcePasswordChange,
     };
   }
 }

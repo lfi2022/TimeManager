@@ -96,6 +96,7 @@ model User {
   lastName            String
   role                CompanyRole
   active              Boolean                  @default(true)
+  forcePasswordChange Boolean @default(false)
   employeeNumber      String?
   phone               String?
   timezone            String?
