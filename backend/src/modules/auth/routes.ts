@@ -13,6 +13,7 @@ import { ReportsService } from '../reports/reports.service.js';
 import { PeriodLockService } from '../period-locks/period-lock.service.js';
 import { SubscriptionService } from '../subscriptions/subscription.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
+import { DomainService } from '../domains/domain.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -257,12 +258,17 @@ export async function registerAuthRoutes(
   const periodLocks = auth ? new PeriodLockService(auth.database) : undefined;
   const subscriptions = auth ? new SubscriptionService(auth.database) : undefined;
   const notifications = auth ? new NotificationService(auth.database, auth.configuration) : undefined;
+  const domains = auth ? new DomainService(auth.database) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
     });
 
-  app.get('/api/platform/plans', { preHandler: requirePlatform }, async () => ({data:{plans:await subscriptions!.plans()}}));
+  app.get('/api/branding', async r => ({data: domains ? await domains.publicBrand(r.hostname) : {name:'TempoPoint',logoUrl:null,primaryColor:null}}));
+  app.get('/api/platform/companies/:id/domains', { preHandler: requirePlatform }, async r => ({data:{domains:await domains!.list((r.params as {id:string}).id)}}));
+  app.post('/api/platform/companies/:id/domains', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => reply.code(201).send({data:{domain:await domains!.create(platformUserId(r),(r.params as {id:string}).id,r.body)}}));
+  app.post('/api/platform/companies/:companyId/domains/:id/verify', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await domains!.verify(platformUserId(r),(r.params as {companyId:string}).companyId,(r.params as {id:string}).id);return x?{data:x}:notFound(reply);});
+  app.patch('/api/platform/companies/:id/branding', { preHandler: [requireCsrf,requirePlatform] }, async r => ({data:{company:await domains!.branding(platformUserId(r),(r.params as {id:string}).id,r.body)}}));  app.get('/api/platform/plans', { preHandler: requirePlatform }, async () => ({data:{plans:await subscriptions!.plans()}}));
   app.get('/api/platform/companies/:id/subscription', { preHandler: requirePlatform }, async r => ({data:await subscriptions!.summary((r.params as {id:string}).id)}));
   app.put('/api/platform/companies/:id/subscription', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await subscriptions!.assign(platformUserId(r),(r.params as {id:string}).id,r.body);return x?{data:{subscription:x}}:notFound(reply);});
   app.post('/api/platform/companies/:id/suspend', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await subscriptions!.suspend(platformUserId(r),(r.params as {id:string}).id,true);return x?{data:{subscription:x}}:notFound(reply);});

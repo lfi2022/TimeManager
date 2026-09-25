@@ -2425,17 +2425,17 @@ isolation entre entreprises n'a pas été testée.**
 
 JALON FINAL — Domaines & personnalisation
 
-[ ] tempopoint.lfinfo.be reste le domaine canonique
-[ ] Sous-domaines clients optionnels
-[ ] Domaines personnalisés
-[ ] Vérification de propriété DNS
+[x] tempopoint.lfinfo.be reste le domaine canonique
+[x] Sous-domaines clients optionnels
+[x] Domaines personnalisés
+[x] Vérification de propriété DNS
 [ ] Gestion TLS
-[ ] Association hostname → Company
-[ ] Logo client
-[ ] Couleurs client
+[x] Association hostname → Company
+[x] Logo client
+[x] Couleurs client
 [ ] Page de connexion personnalisée
 [ ] Branding PWA
 [ ] Option "Powered by TempoPoint — LFINFO"
 [ ] Tests anti-usurpation de hostname
 [ ] Tests isolation tenant via domaines
-[ ] Documentation DNS client
+[x] Documentation DNS client

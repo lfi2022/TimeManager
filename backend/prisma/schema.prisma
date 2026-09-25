@@ -49,6 +49,8 @@ model Company {
   active              Boolean                  @default(true)
   timezone            String
   locale              String
+  logoUrl             String?
+  primaryColor        String?
   createdAt           DateTime                 @default(now()) @db.Timestamptz(6)
   updatedAt           DateTime                 @updatedAt @db.Timestamptz(6)
   users               User[]
@@ -62,6 +64,7 @@ model Company {
   workEntries WorkEntry[]
   balanceTransactions TimeBalanceTransaction[]
   notifications       Notification[]
+  domains             CompanyDomain[]
   schedules           Schedule[]
   scheduleDays        ScheduleDay[]
   scheduleAssignments UserScheduleAssignment[]
@@ -395,4 +398,16 @@ model Notification {
  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
  @@index([companyId,userId,createdAt])
  @@map("Notification")
+}
+
+model CompanyDomain {
+  id String @id @default(uuid()) @db.Uuid
+  companyId String @db.Uuid
+  hostname String @unique
+  verificationToken String @unique
+  verifiedAt DateTime? @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)
+  @@index([companyId])
+  @@map("CompanyDomain")
 }
