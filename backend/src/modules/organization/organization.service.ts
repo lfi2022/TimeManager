@@ -1,9 +1,10 @@
-import type { CompanyRole, Prisma, PrismaClient } from '@prisma/client';
+import type { CompanyRole, PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { requireRole } from '../../security/authorization.js';
 import { hashPassword } from '../../security/password.js';
 import type { TenantContext } from '../../tenancy/context.js';
-import { withCompanyId, withTenant } from '../../tenancy/tenant-prisma.js';
+import { withTenant } from '../../tenancy/tenant-prisma.js';
+import { AuditService } from '../audit/audit.service.js';
 
 const optionalText = (max: number) =>
   z.string().trim().min(1).max(max).nullable().optional();
@@ -71,32 +72,11 @@ function cleanOptional(value: string | null | undefined) {
 }
 
 export class OrganizationService {
-  constructor(private readonly prisma: PrismaClient) {}
+  private readonly auditService: AuditService;
+  constructor(private readonly prisma: PrismaClient) { this.auditService = new AuditService(prisma); }
 
-  private async audit(
-    companyId: string,
-    event: {
-      action: string;
-      entityType: string;
-      entityId?: string;
-      actorUserId?: string;
-      platformUserId?: string;
-      metadata?: object;
-    },
-  ) {
-    await withCompanyId(this.prisma, companyId, (tx) =>
-      tx.auditEvent.create({
-        data: {
-          companyId,
-          action: event.action,
-          entityType: event.entityType,
-          entityId: event.entityId ?? null,
-          actorUserId: event.actorUserId ?? null,
-          platformUserId: event.platformUserId ?? null,
-          metadata: (event.metadata ?? null) as Prisma.InputJsonValue,
-        },
-      }),
-    );
+  private async audit(companyId: string, event: { action: string; entityType: string; entityId?: string; actorUserId?: string; platformUserId?: string; metadata?: object }) {
+    await this.auditService.recordPlatform(companyId, event);
   }
 
   async platformCompanies() {
