@@ -11,6 +11,8 @@ import { DashboardService } from '../dashboard/dashboard.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { ReportsService } from '../reports/reports.service.js';
 import { PeriodLockService } from '../period-locks/period-lock.service.js';
+import { SubscriptionService } from '../subscriptions/subscription.service.js';
+import { NotificationService } from '../notifications/notification.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -40,7 +42,7 @@ function unavailable(reply: FastifyReply) {
     error: {
       code: 'AUTH_NOT_CONFIGURED',
       message:
-        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
+        'Authentification non configurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e.',
     },
   });
 }
@@ -117,11 +119,7 @@ export async function registerAuthRoutes(
     async (request, reply) => {
       if (!auth) return unavailable(reply);
       const body = request.body as { companySlug?: string; email?: string };
-      if (
-        typeof body?.companySlug === 'string' &&
-        typeof body.email === 'string'
-      )
-        await auth.issueUserReset(body.companySlug, body.email);
+      if (typeof body?.companySlug === 'string' && typeof body.email === 'string') { const token=await auth.issueUserReset(body.companySlug, body.email); if(token) await notifications?.email(body.email, 'TempoPoint reset', 'Use this password-reset token: ' + token); }
       return reply.code(202).send({ data: { accepted: true } });
     },
   );
@@ -136,7 +134,7 @@ export async function registerAuthRoutes(
           error: {
             code: 'RESET_TOKEN_INVALID',
             message:
-              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
+              'Jeton invalide ou expirÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©.',
           },
         });
       return reply.code(204).send();
@@ -208,7 +206,7 @@ export async function registerAuthRoutes(
         error: {
           code: 'FORBIDDEN',
           message:
-            'AccÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s administrateur requis.',
+            'AccÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s administrateur requis.',
         },
       });
     (
@@ -257,12 +255,19 @@ export async function registerAuthRoutes(
   const audit = auth ? new AuditService(auth.database) : undefined;
   const reports = auth ? new ReportsService(auth.database) : undefined;
   const periodLocks = auth ? new PeriodLockService(auth.database) : undefined;
+  const subscriptions = auth ? new SubscriptionService(auth.database) : undefined;
+  const notifications = auth ? new NotificationService(auth.database, auth.configuration) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
     });
 
-  app.get(
+  app.get('/api/platform/plans', { preHandler: requirePlatform }, async () => ({data:{plans:await subscriptions!.plans()}}));
+  app.get('/api/platform/companies/:id/subscription', { preHandler: requirePlatform }, async r => ({data:await subscriptions!.summary((r.params as {id:string}).id)}));
+  app.put('/api/platform/companies/:id/subscription', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await subscriptions!.assign(platformUserId(r),(r.params as {id:string}).id,r.body);return x?{data:{subscription:x}}:notFound(reply);});
+  app.post('/api/platform/companies/:id/suspend', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await subscriptions!.suspend(platformUserId(r),(r.params as {id:string}).id,true);return x?{data:{subscription:x}}:notFound(reply);});
+  app.post('/api/platform/companies/:id/reactivate', { preHandler: [requireCsrf,requirePlatform] }, async (r,reply) => {const x=await subscriptions!.suspend(platformUserId(r),(r.params as {id:string}).id,false);return x?{data:{subscription:x}}:notFound(reply);});
+  app.post('/api/platform/companies/:id/support-context', { preHandler: [requireCsrf,requirePlatform] }, async r => ({data:await subscriptions!.supportContext(platformUserId(r),(r.params as {id:string}).id)}));  app.get(
     '/api/platform/companies',
     { preHandler: requirePlatform },
     async () => ({
@@ -340,15 +345,7 @@ export async function registerAuthRoutes(
   app.post(
     '/api/admin/users',
     { preHandler: [requireCsrf, requireAdmin] },
-    async (request, reply) =>
-      reply.code(201).send({
-        data: {
-          user: await organizationService!.createUser(
-            tenant(request),
-            request.body,
-          ),
-        },
-      }),
+    async (request, reply) => { const user=await organizationService!.createUser(tenant(request),request.body); await notifications!.email(user.email,'TempoPoint - invitation','Votre compte TempoPoint est prÃªt. Connectez-vous avec le mot de passe communiquÃ© par votre administrateur.'); return reply.code(201).send({data:{user}}); },
   );
   app.patch(
     '/api/admin/users/:id',
@@ -557,7 +554,8 @@ export async function registerAuthRoutes(
       role: session.identity.role,
     });
   };
-  app.get('/api/work-entries', { preHandler: requireUser }, async (r) => ({
+  app.get('/api/notifications', { preHandler: requireUser }, async r => ({data:{notifications:await notifications!.mine(tenant(r))}}));
+  app.post('/api/notifications/:id/read', { preHandler: [requireCsrf,requireUser] }, async (r,reply) => {const n=await notifications!.read(tenant(r),(r.params as {id:string}).id);return n?{data:{notification:n}}:notFound(reply);});  app.get('/api/work-entries', { preHandler: requireUser }, async (r) => ({
     data: {
       entries: await workEntries!.list(
         tenant(r),
@@ -617,12 +615,8 @@ export async function registerAuthRoutes(
     '/api/work-entries/:id/reject',
     { preHandler: [requireCsrf, requireUser] },
     async (r, reply) => {
-      const x = await workEntries!.decide(
-        tenant(r),
-        (r.params as { id: string }).id,
-        false,
-        (r.body as { reason?: string }).reason,
-      );
+      const x = await workEntries!.decide(tenant(r),(r.params as { id: string }).id,false,(r.body as { reason?: string }).reason);
+      if (x) await notifications!.notify(tenant(r),x.userId,'WORK_ENTRY_REJECTED','Prestation rejetee',(r.body as { reason?: string }).reason ?? 'Une correction est requise.');
       return x ? { data: { entry: x } } : notFound(reply);
     },
   );
@@ -661,7 +655,7 @@ export async function registerAuthRoutes(
         : reply.code(409).send({
             error: {
               code: 'CLOCK_ACTIVE',
-              message: 'Pointage dÃƒÆ’Ã‚Â©jÃƒÆ’Ã‚Â  actif.',
+              message: 'Pointage dÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©jÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  actif.',
             },
           });
     },
@@ -690,7 +684,7 @@ export async function registerAuthRoutes(
         return reply.code(400).send({
           error: {
             code: 'BAD_REQUEST',
-            message: 'ClÃƒÂ© idempotence invalide.',
+            message: 'ClÃƒÆ’Ã‚Â© idempotence invalide.',
           },
         });
       await auth!.database.$transaction(async (tx) => {
@@ -708,7 +702,7 @@ export async function registerAuthRoutes(
   const auditFilters = (q: { action?: string; entityType?: string; from?: string; to?: string }) => Object.fromEntries(Object.entries({ action: q.action, entityType: q.entityType, from: q.from ? new Date(q.from) : undefined, to: q.to ? new Date(q.to) : undefined }).filter(([, value]) => value !== undefined));
   app.get('/api/admin/audit', { preHandler: requireAdmin }, async (r) => ({ data: { events: await audit!.list(tenant(r), auditFilters(r.query as { action?: string; entityType?: string; from?: string; to?: string })) } }));
   app.get('/api/platform/companies/:id/audit', { preHandler: requirePlatform }, async (r) => ({ data: { events: await audit!.listPlatform((r.params as { id: string }).id, auditFilters(r.query as { action?: string; entityType?: string; from?: string; to?: string })) } }));
-  app.get('/api/reports/:period', { preHandler: requireUser }, async (r, reply) => { const period=(r.params as { period: string }).period; if (!['daily','weekly','monthly'].includes(period)) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Période invalide.'}}); const date=new Date(String((r.query as {date?:string}).date ?? new Date().toISOString())); if(Number.isNaN(date.getTime())) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Date invalide.'}}); return {data:await reports!.report(tenant(r),period as 'daily'|'weekly'|'monthly',date)}; });
+  app.get('/api/reports/:period', { preHandler: requireUser }, async (r, reply) => { const period=(r.params as { period: string }).period; if (!['daily','weekly','monthly'].includes(period)) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'PÃ©riode invalide.'}}); const date=new Date(String((r.query as {date?:string}).date ?? new Date().toISOString())); if(Number.isNaN(date.getTime())) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Date invalide.'}}); return {data:await reports!.report(tenant(r),period as 'daily'|'weekly'|'monthly',date)}; });
   app.get('/api/reports/export/csv', { preHandler: requireUser }, async (r,reply) => { const date=new Date(String((r.query as {date?:string}).date ?? new Date().toISOString())); if(Number.isNaN(date.getTime())) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Date invalide.'}}); return reply.header('content-type','text/csv; charset=utf-8').header('content-disposition','attachment; filename="tempopoint-report.csv"').send(await reports!.csv(tenant(r),date)); });
   app.get('/api/admin/period-locks', { preHandler: requireAdmin }, async (r) => ({data:{locks:await periodLocks!.list(tenant(r))}}));
   app.post('/api/admin/period-locks', { preHandler: [requireCsrf,requireAdmin] }, async (r,reply) => reply.code(201).send({data:{lock:await periodLocks!.lock(tenant(r),r.body)}}));
