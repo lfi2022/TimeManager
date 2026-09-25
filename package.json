@@ -22,8 +22,8 @@
     "test:dev": "playwright test -c playwright.dev.config.ts",
     "test:pm2": "pnpm build && node tests/smoke/pm2.mjs",
     "db:generate": "pnpm --filter @lfinfo/backend prisma:generate",
-    "db:migrate": "pnpm --filter @lfinfo/backend prisma:migrate:deploy",
-    "db:seed": "pnpm --filter @lfinfo/backend prisma:seed",
+    "db:migrate": "node scripts/prisma.mjs migrate deploy",
+    "db:seed": "node scripts/prisma.mjs db seed",
     "test:integration": "node scripts/run-integration-tests.mjs"
   },
   "devDependencies": {

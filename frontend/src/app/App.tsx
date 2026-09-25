@@ -1,39 +1,14 @@
-import { Link, Route, Routes } from 'react-router';
+﻿import { Link, Route, Routes, useNavigate } from 'react-router';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api';
 import { HomePage } from '../pages/HomePage';
 import { SchedulingPage } from '../pages/SchedulingPage';
 import { WorkEntriesPage } from '../pages/WorkEntriesPage';
 import { ClockPage } from '../pages/ClockPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { AuditPage, PeriodLocksPage, ReportsPage } from '../pages/AuditReportsPages';
-import {
-  AdminOrganizationPage,
-  PlatformCompaniesPage,
-} from '../pages/OrganizationPages';
-export function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/admin/organization" element={<AdminOrganizationPage />} />
-      <Route path="/platform/companies" element={<PlatformCompaniesPage />} />
-      <Route path="/admin/scheduling" element={<SchedulingPage />} />
-      <Route path="/work-entries" element={<WorkEntriesPage />} />
-      <Route path="/clock" element={<ClockPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />`r`n      <Route path="/admin/audit" element={<AuditPage />} />`r`n      <Route path="/reports" element={<ReportsPage />} />`r`n      <Route path="/admin/period-locks" element={<PeriodLocksPage />} />
-      <Route
-        path="*"
-        element={
-          <main className="mx-auto max-w-xl px-6 py-24">
-            <p className="eyebrow">TEMPOPOINT</p>
-            <h1 className="mt-5 text-4xl font-semibold">Page introuvable</h1>
-            <p className="mt-5 text-slate-600">
-              Cette page n'est pas disponible.
-            </p>
-            <Link className="action mt-8 inline-flex" to="/">
-              Retour a l'accueil
-            </Link>
-          </main>
-        }
-      />
-    </Routes>
-  );
-}
+import { AdminOrganizationPage, PlatformCompaniesPage } from '../pages/OrganizationPages';
+type Me={id:string;firstName:string;lastName:string;role:'ADMIN'|'MANAGER'|'WORKER'};
+function Shell({children}:{children:React.ReactNode}){const nav=useNavigate(),qc=useQueryClient();const me=useQuery({queryKey:['me'],queryFn:()=>api<{data:{user:Me}}>('/api/me').then(x=>x.data.user),retry:false});if(me.isError)return <>{children}</>;const user=me.data;const logout=async()=>{await api('/api/auth/logout',{method:'POST'});qc.clear();nav('/');};return <div className="app-shell"><header className="app-header"><Link to="/dashboard" className="brand"><span className="brand-mark">T</span><b>Tempo</b>Point</Link><nav>{user&&<><Link to="/dashboard">Vue d'ensemble</Link><Link to="/clock">Pointage</Link><Link to="/work-entries">Prestations</Link><Link to="/reports">Rapports</Link>{user.role==='ADMIN'&&<><Link to="/admin/organization">Équipe</Link><Link to="/admin/scheduling">Horaires</Link><Link to="/admin/audit">Audit</Link></>}</>} </nav>{user?<div className="user-menu"><span>{user.firstName} · {user.role}</span><button onClick={()=>void logout()}>Déconnexion</button></div>:<Link className="action compact" to="/">Connexion</Link>}</header><main>{children}</main></div>}
+function Protected({children}:{children:React.ReactNode}){const me=useQuery({queryKey:['me'],queryFn:()=>api('/api/me'),retry:false});if(me.isPending)return <p className="page-state">Chargement de votre espace…</p>;if(me.isError)return <div className="page-state"><h1>Connexion requise</h1><p>Connectez-vous pour accéder à cet espace.</p><Link className="action" to="/">Se connecter</Link></div>;return <>{children}</>}
+export function App(){return <Routes><Route path="/" element={<HomePage/>}/><Route path="*" element={<Shell><Protected><Routes><Route path="/dashboard" element={<DashboardPage/>}/><Route path="/admin/organization" element={<AdminOrganizationPage/>}/><Route path="/platform/companies" element={<PlatformCompaniesPage/>}/><Route path="/admin/scheduling" element={<SchedulingPage/>}/><Route path="/work-entries" element={<WorkEntriesPage/>}/><Route path="/clock" element={<ClockPage/>}/><Route path="/reports" element={<ReportsPage/>}/><Route path="/admin/audit" element={<AuditPage/>}/><Route path="/admin/period-locks" element={<PeriodLocksPage/>}/><Route path="*" element={<div className="page-state"><h1>Page introuvable</h1><Link className="action" to="/dashboard">Retour au tableau de bord</Link></div>}/></Routes></Protected></Shell>}/></Routes>}

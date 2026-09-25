@@ -1,39 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-async function request(path: string, method = 'GET') {
-  const csrf = await fetch('/api/auth/csrf').then((r) => r.json());
-  const r = await fetch(path, {
-    method,
-    credentials: 'include',
-    headers: method === 'GET' ? {} : { 'x-csrf-token': csrf.data.csrfToken },
-  });
-  if (!r.ok) throw new Error();
-  return r.json();
-}
-export function ClockPage() {
-  const client = useQueryClient();
-  const q = useQuery({
-    queryKey: ['clock'],
-    queryFn: () => request('/api/clock/status'),
-  });
-  const active = q.data?.data.session;
-  const action = async () => {
-    await request(active ? '/api/clock/stop' : '/api/clock/start', 'POST');
-    await client.invalidateQueries({ queryKey: ['clock'] });
-  };
-  return (
-    <main className="mx-auto max-w-md px-5 py-12">
-      <p className="eyebrow">TEMPOPOINT · POINTAGE</p>
-      <h1 className="mt-3 text-3xl font-semibold">
-        {active ? 'Pointage en cours' : 'Prêt à commencer'}
-      </h1>
-      <p className="mt-4 text-slate-600">
-        {active
-          ? 'Terminez votre prestation lorsque votre journée est finie.'
-          : 'Démarrez votre pointage en un geste.'}
-      </p>
-      <button className="action mt-8 w-full" onClick={() => void action()}>
-        {active ? 'Terminer' : 'Débuter'}
-      </button>
-    </main>
-  );
-}
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api';
+type Session={startedAt:string;worksiteId:string|null};
+export function ClockPage(){const client=useQueryClient();const q=useQuery({queryKey:['clock'],queryFn:()=>api<{data:{session:Session|null}}>('/api/clock/status').then(x=>x.data.session),refetchInterval:30000});const [now,setNow]=useState(0);useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);const action=useMutation({mutationFn:()=>api(q.data?'/api/clock/stop':'/api/clock/start',{method:'POST',body:JSON.stringify({})}),onSuccess:()=>void client.invalidateQueries({queryKey:['clock']})});const active=q.data;const elapsed=active?Math.max(0,Math.floor((now-new Date(active.startedAt).getTime())/60000)):0;return <main className="mx-auto max-w-xl px-5 py-12"><p className="eyebrow">TEMPOPOINT · POINTAGE</p><section className="mt-5 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200"><span className={'mx-auto grid h-16 w-16 place-items-center rounded-full text-2xl '+(active?'bg-emerald-100 text-emerald-800':'bg-slate-100')}>{active?'●':'○'}</span><h1 className="mt-5 text-3xl font-semibold">{active?'Journée en cours':'Prêt à démarrer'}</h1><p className="mt-3 text-slate-600">{active?`Démarrée à ${new Date(active.startedAt).toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'})} · ${Math.floor(elapsed/60)} h ${elapsed%60} min`:'Démarrez votre pointage lorsque vous arrivez sur site.'}</p>{action.isError&&<p className="mt-4 text-sm text-red-700">L’action a échoué. Vérifiez votre connexion puis réessayez.</p>}<button className={'action mt-8 w-full '+(active?'!bg-red-700':'')} onClick={()=>action.mutate()} disabled={action.isPending}>{action.isPending?'Traitement…':active?'Terminer ma journée':'Démarrer ma journée'}</button></section><p className="mt-6 text-center text-sm text-slate-500">Le temps est calculé côté serveur à la clôture du pointage.</p></main>}

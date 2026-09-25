@@ -1,9 +1,5 @@
-import { healthResponseSchema } from '@lfinfo/shared';
-export async function fetchHealth() {
-  const response = await fetch('/api/health', {
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok)
-    throw new Error('Le service est momentanément indisponible.');
-  return healthResponseSchema.parse(await response.json()).data;
-}
+﻿import { healthResponseSchema } from '@lfinfo/shared';
+export type ApiError = Error & { status?: number; code?: string };
+export async function fetchHealth() { const response=await fetch('/api/health',{headers:{Accept:'application/json'}}); if(!response.ok) throw new Error('Service unavailable'); return healthResponseSchema.parse(await response.json()).data; }
+export async function api<T>(path:string, options:RequestInit={}) : Promise<T> { const method=(options.method??'GET').toUpperCase(); const headers=new Headers(options.headers); headers.set('Accept','application/json'); if(!['GET','HEAD'].includes(method)){const csrf=await fetch('/api/auth/csrf',{credentials:'include'}); if(!csrf.ok) throw new Error('Unable to secure request'); headers.set('x-csrf-token',(await csrf.json()).data.csrfToken); if(options.body) headers.set('Content-Type','application/json');} const response=await fetch(path,{...options,method,headers,credentials:'include'}); if(!response.ok){const body=await response.json().catch(()=>null);const error=Object.assign(new Error(body?.error?.message??'Request failed'),{status:response.status,code:body?.error?.code}) as ApiError;throw error;} return response.status===204?undefined as T:response.json() as Promise<T>; }
+export const minutes=(value:number)=>`${value<0?'-':''}${Math.floor(Math.abs(value)/60)}h${String(Math.abs(value)%60).padStart(2,'0')}`;
