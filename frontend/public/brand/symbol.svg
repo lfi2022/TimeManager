@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<g transform="translate(30 20) scale(1.08)">
+<defs>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#2563FF"/>
+    <stop offset="58%" stop-color="#0878E8"/>
+    <stop offset="100%" stop-color="#38BFF8"/>
+  </linearGradient>
+</defs>
+<g fill="url(#g)">
+  <!-- T -->
+  <path d="M80 72 H315 C315 112 287 140 247 140 H213 V340
+           C151 331 118 291 118 230 V140 H80 Z"/>
+  <!-- P / clock arc -->
+  <path d="M228 142
+           C317 142 372 190 372 267
+           C372 348 311 400 226 400
+           V334
+           C274 334 306 311 306 268
+           C306 229 279 207 228 207 Z"/>
+</g>
+<circle cx="246" cy="267" r="31" fill="#2563FF"/>
+</g></svg>
