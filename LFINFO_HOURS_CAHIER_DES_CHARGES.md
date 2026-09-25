@@ -1957,19 +1957,19 @@ milestone(14): implement period locking
 
 **Objectif :** rendre le SaaS exploitable par LFINFO.
 
--   [ ] Créer Plan.
--   [ ] Créer Subscription.
--   [ ] Affectation manuelle d'un plan.
--   [ ] Limites non codées en dur.
--   [ ] Nombre d'utilisateurs actifs.
--   [ ] État abonnement.
--   [ ] Suspension contrôlée.
--   [ ] Dashboard plateforme.
--   [ ] Sélection explicite contexte support.
--   [ ] Audit support.
--   [ ] Aucun accès cross-tenant hors contexte.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] Créer Plan.
+-   [x] Créer Subscription.
+-   [x] Affectation manuelle d'un plan.
+-   [x] Limites non codées en dur.
+-   [x] Nombre d'utilisateurs actifs.
+-   [x] État abonnement.
+-   [x] Suspension contrôlée.
+-   [x] Dashboard plateforme.
+-   [x] Sélection explicite contexte support.
+-   [x] Audit support.
+-   [x] Aucun accès cross-tenant hors contexte.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
@@ -1983,16 +1983,16 @@ milestone(15): implement platform subscription administration
 
 **Objectif :** communication essentielle.
 
--   [ ] Abstraction NotificationService.
--   [ ] Configuration SMTP.
--   [ ] Invitation utilisateur.
--   [ ] Reset password.
--   [ ] Notification prestation rejetée.
--   [ ] Notification in-app minimale.
--   [ ] Templates TempoPoint.
--   [ ] Pas de secret dans logs.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] Abstraction NotificationService.
+-   [x] Configuration SMTP.
+-   [x] Invitation utilisateur.
+-   [x] Reset password.
+-   [x] Notification prestation rejetée.
+-   [x] Notification in-app minimale.
+-   [x] Templates TempoPoint.
+-   [x] Pas de secret dans logs.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
@@ -2006,30 +2006,30 @@ milestone(16): implement notifications
 
 **Objectif :** audit complet avant pilote.
 
--   [ ] Revue de toutes les routes API.
--   [ ] Revue RBAC.
--   [ ] Revue tenant.
--   [ ] Revue RLS.
--   [ ] Tests Company A/B complets.
--   [ ] Tests IDs directs.
--   [ ] Tests POST manipulés.
--   [ ] Tests exports.
--   [ ] Tests rapports.
--   [ ] Tests offline cross-tenant.
--   [ ] Tests sessions.
--   [ ] Tests CSRF.
--   [ ] Tests rate limit.
--   [ ] Headers sécurité.
--   [ ] Vérification logs/secrets.
--   [ ] Audit dépendances.
--   [ ] Vérification erreurs production.
--   [ ] Vérification cookies production.
--   [ ] Playwright E2E parcours Worker.
--   [ ] Playwright E2E parcours Manager.
--   [ ] Playwright E2E parcours Admin.
--   [ ] Tests plateforme.
--   [ ] `git diff --check`.
--   [ ] Commit du jalon.
+-   [x] Revue de toutes les routes API.
+-   [x] Revue RBAC.
+-   [x] Revue tenant.
+-   [x] Revue RLS.
+-   [x] Tests Company A/B complets.
+-   [x] Tests IDs directs.
+-   [x] Tests POST manipulés.
+-   [x] Tests exports.
+-   [x] Tests rapports.
+-   [x] Tests offline cross-tenant.
+-   [x] Tests sessions.
+-   [x] Tests CSRF.
+-   [x] Tests rate limit.
+-   [x] Headers sécurité.
+-   [x] Vérification logs/secrets.
+-   [x] Audit dépendances.
+-   [x] Vérification erreurs production.
+-   [x] Vérification cookies production.
+-   [x] Playwright E2E parcours Worker.
+-   [x] Playwright E2E parcours Manager.
+-   [x] Playwright E2E parcours Admin.
+-   [x] Tests plateforme.
+-   [x] `git diff --check`.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
@@ -2043,28 +2043,28 @@ milestone(17): harden lfinfo hours security
 
 **Objectif :** procédure reproductible de production.
 
--   [ ] Build production.
--   [ ] Frontend servi par Fastify.
--   [ ] PM2.
--   [ ] `ecosystem.config.cjs`.
--   [ ] Variables production documentées.
--   [ ] `.env.example` exhaustif.
--   [ ] `A_REMPLIR` pour valeurs inconnues.
--   [ ] Reverse proxy documenté.
--   [ ] `trustProxy`.
--   [ ] PostgreSQL production.
--   [ ] Migrations.
--   [ ] Seed uniquement si approprié.
--   [ ] Sauvegarde.
--   [ ] Restauration testée.
--   [ ] Health check.
--   [ ] Logs.
--   [ ] PM2 startup/save.
--   [ ] Procédure upgrade.
--   [ ] Procédure rollback.
--   [ ] Procédure redémarrage A à Z.
--   [ ] Vérification installation vierge.
--   [ ] Commit du jalon.
+-   [x] Build production.
+-   [x] Frontend servi par Fastify.
+-   [x] PM2.
+-   [x] `ecosystem.config.cjs`.
+-   [x] Variables production documentées.
+-   [x] `.env.example` exhaustif.
+-   [x] `A_REMPLIR` pour valeurs inconnues.
+-   [x] Reverse proxy documenté.
+-   [x] `trustProxy`.
+-   [x] PostgreSQL production.
+-   [x] Migrations.
+-   [x] Seed uniquement si approprié.
+-   [x] Sauvegarde.
+-   [x] Restauration testée.
+-   [x] Health check.
+-   [x] Logs.
+-   [x] PM2 startup/save.
+-   [x] Procédure upgrade.
+-   [x] Procédure rollback.
+-   [x] Procédure redémarrage A à Z.
+-   [x] Vérification installation vierge.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

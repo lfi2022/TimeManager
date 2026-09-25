@@ -31,6 +31,11 @@ enum WorkEntrySource {
   IMPORT
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 enum CompanyRole {
   ADMIN
   MANAGER
@@ -52,9 +57,11 @@ model Company {
   teams               Team[]
   auditEvents         AuditEvent[]
   periodLocks         PeriodLock[]
+  subscription        Subscription?
   worksites           Worksite[]
   workEntries WorkEntry[]
   balanceTransactions TimeBalanceTransaction[]
+  notifications       Notification[]
   schedules           Schedule[]
   scheduleDays        ScheduleDay[]
   scheduleAssignments UserScheduleAssignment[]
@@ -101,6 +108,7 @@ model User {
   scheduleAssignments UserScheduleAssignment[]
   workEntries WorkEntry[] @relation("WorkEntryUser")
   balanceTransactions TimeBalanceTransaction[]
+  notifications       Notification[]
   @@unique([companyId, email])
   @@index([companyId])
   @@map("User")
@@ -349,4 +357,42 @@ model PeriodLock {
 
   @@index([companyId, startDate, endDate])
   @@map("PeriodLock")
+}
+model Plan {
+  id String @id @default(uuid()) @db.Uuid
+  code String @unique
+  name String
+  active Boolean @default(true)
+  limits Json
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  subscriptions Subscription[]
+  @@map("Plan")
+}
+model Subscription {
+  id String @id @default(uuid()) @db.Uuid
+  companyId String @unique @db.Uuid
+  planId String @db.Uuid
+  status SubscriptionStatus @default(ACTIVE)
+  suspendedAt DateTime? @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)
+  plan Plan @relation(fields:[planId],references:[id],onDelete:Restrict)
+  @@index([planId])
+  @@map("Subscription")
+}
+model Notification {
+ id String @id @default(uuid()) @db.Uuid
+ companyId String @db.Uuid
+ userId String @db.Uuid
+ type String
+ title String
+ body String
+ readAt DateTime? @db.Timestamptz(6)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ @@index([companyId,userId,createdAt])
+ @@map("Notification")
 }
