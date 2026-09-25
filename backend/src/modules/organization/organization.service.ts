@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireRole } from '../../security/authorization.js';
 import { hashPassword } from '../../security/password.js';
 import type { TenantContext } from '../../tenancy/context.js';
-import { withTenant } from '../../tenancy/tenant-prisma.js';
+import { withCompanyId, withTenant } from '../../tenancy/tenant-prisma.js';
 import { AuditService } from '../audit/audit.service.js';
 
 const optionalText = (max: number) =>
@@ -138,6 +138,68 @@ export class OrganizationService {
     return (await this.platformCompanies()).find(
       (company) => company.id === id,
     )!;
+  }
+
+
+  async supportUsers(platformUserId: string, companyId: string) {
+    const users = await withCompanyId(this.prisma, companyId, (tx) =>
+      tx.user.findMany({
+        where: { companyId },
+        orderBy: [{ active: 'desc' }, { email: 'asc' }],
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true },
+      }),
+    );
+    await this.audit(companyId, {
+      action: 'SUPPORT_USERS_VIEWED',
+      entityType: 'User',
+      platformUserId,
+    });
+    return users;
+  }
+
+  async supportUpdateUser(
+    platformUserId: string,
+    companyId: string,
+    userId: string,
+    input: unknown,
+  ) {
+    const patch = z
+      .object({ active: z.boolean().optional(), role: z.enum(['ADMIN', 'MANAGER', 'WORKER']).optional() })
+      .strict()
+      .refine((value) => value.active !== undefined || value.role !== undefined)
+      .parse(input);
+    const result = await withCompanyId(this.prisma, companyId, async (tx) => {
+      const user = await tx.user.findFirst({ where: { id: userId, companyId } });
+      if (!user) return { kind: 'not-found' as const };
+      const active = patch.active ?? user.active;
+      const role = patch.role ?? user.role;
+      if (user.active && user.role === 'ADMIN' && (!active || role !== 'ADMIN')) {
+        const otherAdmins = await tx.user.count({
+          where: { companyId, active: true, role: 'ADMIN', id: { not: userId } },
+        });
+        if (otherAdmins === 0) return { kind: 'last-admin' as const };
+      }
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: { active, role },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true },
+      });
+      if (!active)
+        await tx.userSession.updateMany({
+          where: { companyId, userId, invalidatedAt: null },
+          data: { invalidatedAt: new Date() },
+        });
+      return { kind: 'updated' as const, user: updated };
+    });
+    if (result.kind === 'updated')
+      await this.audit(companyId, {
+        action: 'SUPPORT_USER_UPDATED',
+        entityType: 'User',
+        entityId: userId,
+        platformUserId,
+        metadata: { active: result.user.active, role: result.user.role },
+      });
+    return result;
   }
 
   async users(context: TenantContext) {

@@ -330,6 +330,13 @@ export async function registerAuthRoutes(
     },
   );
 
+  app.get('/api/platform/companies/:id/users', { preHandler: requirePlatform }, async (request) => ({ data: { users: await organizationService!.supportUsers(platformUserId(request), (request.params as { id: string }).id) } }));
+  app.patch('/api/platform/companies/:companyId/users/:userId', { preHandler: [requireCsrf, requirePlatform] }, async (request, reply) => {
+    const result = await organizationService!.supportUpdateUser(platformUserId(request), (request.params as { companyId: string }).companyId, (request.params as { userId: string }).userId, request.body);
+    if (result.kind === 'not-found') return notFound(reply);
+    if (result.kind === 'last-admin') return reply.code(409).send({ error: { code: 'LAST_ACTIVE_ADMIN', message: 'Attribuez d abord un autre administrateur actif.' } });
+    return { data: { user: result.user } };
+  });
   app.get(
     '/api/admin/users',
     { preHandler: requireAdmin },
