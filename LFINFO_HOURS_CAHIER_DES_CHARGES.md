@@ -1879,21 +1879,21 @@ milestone(11): implement management dashboard
 
 **Objectif :** traçabilité administrative.
 
--   [ ] Créer AuditEvent.
--   [ ] Centraliser service d'audit.
--   [ ] Audit utilisateurs.
--   [ ] Audit équipes.
--   [ ] Audit horaires.
--   [ ] Audit prestations.
--   [ ] Audit validations/rejets.
--   [ ] Audit pot.
--   [ ] Audit accès support.
--   [ ] Interface audit ADMIN.
--   [ ] Interface audit plateforme.
--   [ ] Filtres.
--   [ ] Aucun secret dans metadata.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] Créer AuditEvent.
+-   [x] Centraliser service d'audit.
+-   [x] Audit utilisateurs.
+-   [x] Audit équipes.
+-   [x] Audit horaires.
+-   [x] Audit prestations.
+-   [x] Audit validations/rejets.
+-   [x] Audit pot.
+-   [x] Audit accès support.
+-   [x] Interface audit ADMIN.
+-   [x] Interface audit plateforme.
+-   [x] Filtres.
+-   [x] Aucun secret dans metadata.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
@@ -1907,20 +1907,20 @@ milestone(12): implement audit trail
 
 **Objectif :** fournir des données exploitables administrativement.
 
--   [ ] Rapport journalier.
--   [ ] Rapport hebdomadaire.
--   [ ] Rapport mensuel.
--   [ ] Totaux prévus.
--   [ ] Totaux prestés.
--   [ ] Écarts.
--   [ ] Pot.
--   [ ] Export CSV.
+-   [x] Rapport journalier.
+-   [x] Rapport hebdomadaire.
+-   [x] Rapport mensuel.
+-   [x] Totaux prévus.
+-   [x] Totaux prestés.
+-   [x] Écarts.
+-   [x] Pot.
+-   [x] Export CSV.
 -   [ ] Export Excel si retenu pour V1.
 -   [ ] Export PDF si retenu pour V1.
--   [ ] Isolation tenant dans exports.
--   [ ] Aucun ID étranger exploitable.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] Isolation tenant dans exports.
+-   [x] Aucun ID étranger exploitable.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 
@@ -1934,16 +1934,16 @@ milestone(13): implement reports and exports
 
 **Objectif :** figer les périodes transmises.
 
--   [ ] Créer PeriodLock.
--   [ ] Verrouiller plage de dates.
--   [ ] Interdire édition Worker.
--   [ ] Interdire édition Manager normale.
--   [ ] Correction ADMIN explicite.
--   [ ] Audit de correction.
--   [ ] Impact pot correctement corrigé.
--   [ ] Déverrouillage exceptionnel audité si autorisé.
--   [ ] Tests.
--   [ ] Commit du jalon.
+-   [x] Créer PeriodLock.
+-   [x] Verrouiller plage de dates.
+-   [x] Interdire édition Worker.
+-   [x] Interdire édition Manager normale.
+-   [x] Correction ADMIN explicite.
+-   [x] Audit de correction.
+-   [x] Impact pot correctement corrigé.
+-   [x] Déverrouillage exceptionnel audité si autorisé.
+-   [x] Tests.
+-   [x] Commit du jalon.
 
 **Commit attendu :**
 

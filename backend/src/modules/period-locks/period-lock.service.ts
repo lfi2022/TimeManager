@@ -1,0 +1,8 @@
+import type { PrismaClient } from '@prisma/client';
+import { z } from 'zod';
+import { requireRole } from '../../security/authorization.js';
+import type { TenantContext } from '../../tenancy/context.js';
+import { withTenant } from '../../tenancy/tenant-prisma.js';
+import { AuditService } from '../audit/audit.service.js';
+const lockInput=z.object({startDate:z.coerce.date(),endDate:z.coerce.date(),reason:z.string().trim().max(500).optional()}).strict().refine(x=>x.endDate>=x.startDate);
+export class PeriodLockService { private readonly audit: AuditService; constructor(private readonly prisma: PrismaClient){ this.audit=new AuditService(prisma); } async list(c: TenantContext){requireRole(c,['ADMIN']); return withTenant(this.prisma,c,(tx,t)=>tx.periodLock.findMany({where:{companyId:t.companyId},orderBy:{startDate:'desc'}}));} async lock(c: TenantContext, raw: unknown){requireRole(c,['ADMIN']); const d=lockInput.parse(raw); const lock=await withTenant(this.prisma,c,(tx,t)=>tx.periodLock.create({data:{companyId:t.companyId,startDate:d.startDate,endDate:d.endDate,lockedByUserId:c.userId,reason:d.reason??null}})); await this.audit.record(c,{action:'PERIOD_LOCKED',entityType:'PeriodLock',entityId:lock.id,metadata:{startDate:d.startDate.toISOString().slice(0,10),endDate:d.endDate.toISOString().slice(0,10)}}); return lock;} async unlock(c: TenantContext,id:string){requireRole(c,['ADMIN']); const lock=await withTenant(this.prisma,c,async(tx,t)=>{const x=await tx.periodLock.findFirst({where:{id,companyId:t.companyId}}); if(!x)return null; await tx.periodLock.delete({where:{id}});return x;}); if(lock)await this.audit.record(c,{action:'PERIOD_UNLOCKED',entityType:'PeriodLock',entityId:id,metadata:{reason:'exceptional'}}); return lock;} }

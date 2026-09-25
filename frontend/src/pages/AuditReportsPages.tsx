@@ -1,0 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+async function load(path:string){const r=await fetch(path,{credentials:'include'});if(!r.ok)throw new Error();return r.json();}
+export function AuditPage(){const q=useQuery({queryKey:['audit'],queryFn:()=>load('/api/admin/audit')});return <main><h1>Journal audit</h1><ul>{q.data?.data.events.map((e:{id:string;action:string;entityType:string})=><li key={e.id}>{e.action} {e.entityType}</li>)}</ul></main>}
+export function ReportsPage(){const q=useQuery({queryKey:['report'],queryFn:()=>load('/api/reports/monthly')});return <main><h1>Rapport mensuel</h1><pre>{JSON.stringify(q.data?.data.totals)}</pre><a href="/api/reports/export/csv">CSV</a></main>}
+export function PeriodLocksPage(){const q=useQuery({queryKey:['locks'],queryFn:()=>load('/api/admin/period-locks')});return <main><h1>Periodes verrouillees</h1><ul>{q.data?.data.locks.map((x:{id:string;startDate:string;endDate:string})=><li key={x.id}>{x.startDate.slice(0,10)} - {x.endDate.slice(0,10)}</li>)}</ul></main>}

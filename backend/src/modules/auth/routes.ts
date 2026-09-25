@@ -8,6 +8,9 @@ import { WorkEntryService } from '../work-entries/work-entry.service.js';
 import { TimeBalanceService } from '../time-balance/time-balance.service.js';
 import { ClockService } from '../clock/clock.service.js';
 import { DashboardService } from '../dashboard/dashboard.service.js';
+import { AuditService } from '../audit/audit.service.js';
+import { ReportsService } from '../reports/reports.service.js';
+import { PeriodLockService } from '../period-locks/period-lock.service.js';
 
 const sessionCookie = 'tempopoint_session';
 const platformSessionCookie = 'tempopoint_platform_session';
@@ -251,6 +254,9 @@ export async function registerAuthRoutes(
   const balances = auth ? new TimeBalanceService(auth.database) : undefined;
   const clock = auth ? new ClockService(auth.database) : undefined;
   const dashboard = auth ? new DashboardService(auth.database) : undefined;
+  const audit = auth ? new AuditService(auth.database) : undefined;
+  const reports = auth ? new ReportsService(auth.database) : undefined;
+  const periodLocks = auth ? new PeriodLockService(auth.database) : undefined;
   const notFound = (reply: FastifyReply) =>
     reply.code(404).send({
       error: { code: 'NOT_FOUND', message: 'Ressource introuvable.' },
@@ -699,7 +705,15 @@ export async function registerAuthRoutes(
       return reply.code(202).send({ data: { synchronized: true } });
     },
   );
-  app.get('/api/dashboard', { preHandler: requireUser }, async (r) => ({
+  const auditFilters = (q: { action?: string; entityType?: string; from?: string; to?: string }) => Object.fromEntries(Object.entries({ action: q.action, entityType: q.entityType, from: q.from ? new Date(q.from) : undefined, to: q.to ? new Date(q.to) : undefined }).filter(([, value]) => value !== undefined));
+  app.get('/api/admin/audit', { preHandler: requireAdmin }, async (r) => ({ data: { events: await audit!.list(tenant(r), auditFilters(r.query as { action?: string; entityType?: string; from?: string; to?: string })) } }));
+  app.get('/api/platform/companies/:id/audit', { preHandler: requirePlatform }, async (r) => ({ data: { events: await audit!.listPlatform((r.params as { id: string }).id, auditFilters(r.query as { action?: string; entityType?: string; from?: string; to?: string })) } }));
+  app.get('/api/reports/:period', { preHandler: requireUser }, async (r, reply) => { const period=(r.params as { period: string }).period; if (!['daily','weekly','monthly'].includes(period)) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Période invalide.'}}); const date=new Date(String((r.query as {date?:string}).date ?? new Date().toISOString())); if(Number.isNaN(date.getTime())) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Date invalide.'}}); return {data:await reports!.report(tenant(r),period as 'daily'|'weekly'|'monthly',date)}; });
+  app.get('/api/reports/export/csv', { preHandler: requireUser }, async (r,reply) => { const date=new Date(String((r.query as {date?:string}).date ?? new Date().toISOString())); if(Number.isNaN(date.getTime())) return reply.code(400).send({error:{code:'BAD_REQUEST',message:'Date invalide.'}}); return reply.header('content-type','text/csv; charset=utf-8').header('content-disposition','attachment; filename="tempopoint-report.csv"').send(await reports!.csv(tenant(r),date)); });
+  app.get('/api/admin/period-locks', { preHandler: requireAdmin }, async (r) => ({data:{locks:await periodLocks!.list(tenant(r))}}));
+  app.post('/api/admin/period-locks', { preHandler: [requireCsrf,requireAdmin] }, async (r,reply) => reply.code(201).send({data:{lock:await periodLocks!.lock(tenant(r),r.body)}}));
+  app.delete('/api/admin/period-locks/:id', { preHandler: [requireCsrf,requireAdmin] }, async (r,reply) => {const lock=await periodLocks!.unlock(tenant(r),(r.params as {id:string}).id); return lock?reply.code(204).send():notFound(reply);});
+  app.post('/api/work-entries/:id/correct', { preHandler: [requireCsrf,requireAdmin] }, async (r,reply) => {const entry=await workEntries!.correct(tenant(r),(r.params as {id:string}).id,r.body); return entry?{data:{entry}}:notFound(reply);});  app.get('/api/dashboard', { preHandler: requireUser }, async (r) => ({
     data: await dashboard!.summary(tenant(r)),
   }));
 }

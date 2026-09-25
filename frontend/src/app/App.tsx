@@ -4,6 +4,7 @@ import { SchedulingPage } from '../pages/SchedulingPage';
 import { WorkEntriesPage } from '../pages/WorkEntriesPage';
 import { ClockPage } from '../pages/ClockPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { AuditPage, PeriodLocksPage, ReportsPage } from '../pages/AuditReportsPages';
 import {
   AdminOrganizationPage,
   PlatformCompaniesPage,
@@ -17,7 +18,7 @@ export function App() {
       <Route path="/admin/scheduling" element={<SchedulingPage />} />
       <Route path="/work-entries" element={<WorkEntriesPage />} />
       <Route path="/clock" element={<ClockPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />`r`n      <Route path="/admin/audit" element={<AuditPage />} />`r`n      <Route path="/reports" element={<ReportsPage />} />`r`n      <Route path="/admin/period-locks" element={<PeriodLocksPage />} />
       <Route
         path="*"
         element={

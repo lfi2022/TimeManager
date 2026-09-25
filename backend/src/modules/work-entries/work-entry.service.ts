@@ -54,6 +54,7 @@ export class WorkEntryService {
       }),
     );
   }
+  async locked(tx: Prisma.TransactionClient, companyId: string, date: Date) { return Boolean(await tx.periodLock.findFirst({ where: { companyId, startDate: { lte: date }, endDate: { gte: date } }, select: { id: true } })); }
   async expected(
     tx: Prisma.TransactionClient,
     companyId: string,
@@ -92,6 +93,7 @@ export class WorkEntryService {
           where: { id: d.worksiteId, companyId: t.companyId, active: true },
         }));
       if (!user || !site) return null;
+      if (await this.locked(tx, t.companyId, d.date)) return null;
       const worked = minutes(d.startTime, d.endTime, d.breakMinutes);
       const expected = await this.expected(tx, t.companyId, userId, d.date);
       return tx.workEntry.create({
@@ -169,6 +171,7 @@ export class WorkEntryService {
       const end = d.endTime ?? old.endTime;
       const br = d.breakMinutes ?? old.breakMinutes;
       if (!start || !end) return null;
+      if (await this.locked(tx, t.companyId, d.date ?? old.date)) return null;
       const worked = minutes(start, end, br);
       const expected = await this.expected(
         tx,
@@ -203,6 +206,7 @@ export class WorkEntryService {
       const e = await tx.workEntry.findFirst({
         where: { id, companyId: t.companyId },
       });
+      if (e && (await this.locked(tx, t.companyId, e.date))) return null;
       if (
         !e ||
         e.status !== 'DRAFT' ||
@@ -221,7 +225,11 @@ export class WorkEntryService {
     if (r) await this.audit(c, 'WORK_ENTRY_SUBMITTED', id);
     return r;
   }
-  async decide(
+  async correct(c: TenantContext, id: string, raw: unknown) {
+    requireRole(c, ['ADMIN']);
+    const d = edit.extend({ reason: z.string().trim().min(3).max(500) }).strict().parse(raw);
+    const r = await withTenant(this.prisma, c, async (tx, t) => { const old=await tx.workEntry.findFirst({where:{id,companyId:t.companyId}}); if(!old||old.status!=='APPROVED')return null; const start=d.startTime??old.startTime,end=d.endTime??old.endTime,br=d.breakMinutes??old.breakMinutes;if(!start||!end)return null;const date=d.date??old.date,worked=minutes(start,end,br),expected=await this.expected(tx,t.companyId,old.userId,date),difference=worked-expected; const updated=await tx.workEntry.update({where:{id},data:{date,startTime:start,endTime:end,breakMinutes:br,workedMinutes:worked,expectedMinutes:expected,differenceMinutes:difference,worksiteId:d.worksiteId===undefined?old.worksiteId:d.worksiteId,note:d.note===undefined?old.note:d.note,updatedByUserId:c.userId}}); const delta=difference-old.differenceMinutes;if(delta!==0)await tx.timeBalanceTransaction.create({data:{companyId:t.companyId,userId:old.userId,minutes:delta,type:'CORRECTION',reason:d.reason,createdByUserId:c.userId}});return updated; }); if(r)await this.audit(c,'WORK_ENTRY_CORRECTED',id,{reason:d.reason});return r;
+  }  async decide(
     c: TenantContext,
     id: string,
     approve: boolean,
