@@ -9,7 +9,7 @@ import { withCompanyId, withTenant } from '../../tenancy/tenant-prisma.js';
 
 const loginSchema = z
   .object({
-    companySlug: z.string().trim().min(1).max(100),
+    companySlug: z.string().trim().min(1).max(100).optional(),
     email: z.string().email().max(320),
     password: z.string().min(1).max(1024),
   })
@@ -63,35 +63,32 @@ export class AuthService {
 
   async loginUser(input: unknown) {
     const data = loginSchema.parse(input);
-    const companyRows = await this.prisma.$queryRawUnsafe<
-      { companyId: string | null }[]
-    >('SELECT "auth_company_id_by_slug"($1) AS "companyId"', data.companySlug);
-    const companyId = companyRows[0]?.companyId;
+    let companyId: string | undefined;
+    if (data.companySlug) {
+      const companyRows = await this.prisma.$queryRawUnsafe<{ companyId: string | null }[]>(
+        'SELECT "auth_company_id_by_slug"($1) AS "companyId"', data.companySlug,
+      );
+      companyId = companyRows[0]?.companyId ?? undefined;
+    } else {
+      const matches = await this.prisma.$queryRawUnsafe<{ userId: string; companyId: string }[]>(
+        'SELECT * FROM "auth_user_tenant_by_email"($1)', data.email,
+      );
+      // Never choose a tenant arbitrarily when an address is shared.
+      if (matches.length !== 1) return null;
+      companyId = matches[0]!.companyId;
+    }
     if (!companyId) return null;
-    const user = await withCompanyId(this.prisma, companyId, (transaction) =>
-      transaction.user.findFirst({
-        where: { companyId, email: data.email, active: true },
-      }),
-    );
-    if (!user || !(await verifyPassword(user.passwordHash, data.password)))
-      return null;
+    const user = await withCompanyId(this.prisma, companyId, transaction => transaction.user.findFirst({
+      where: { companyId, email: data.email, active: true },
+    }));
+    if (!user || !(await verifyPassword(user.passwordHash, data.password))) return null;
     const token = this.newToken();
-    await withCompanyId(this.prisma, companyId, (transaction) =>
-      transaction.userSession.create({
-        data: {
-          companyId,
-          userId: user.id,
-          tokenHash: this.tokenHash(token),
-          expiresAt: this.expiresAt(this.config.SESSION_TTL_HOURS * 60),
-        },
-      }),
-    );
-    await withCompanyId(this.prisma, companyId, (transaction) =>
-      transaction.user.update({
-        where: { id: user.id },
-        data: { lastName: user.lastName },
-      }),
-    );
+    await withCompanyId(this.prisma, companyId, transaction => transaction.userSession.create({
+      data: { companyId, userId: user.id, tokenHash: this.tokenHash(token), expiresAt: this.expiresAt(this.config.SESSION_TTL_HOURS * 60) },
+    }));
+    await withCompanyId(this.prisma, companyId, transaction => transaction.user.update({
+      where: { id: user.id }, data: { lastName: user.lastName },
+    }));
     return { token, identity: this.userIdentity(user) };
   }
 

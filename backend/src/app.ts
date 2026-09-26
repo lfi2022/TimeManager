@@ -86,7 +86,7 @@ export async function buildApp(
   app.setErrorHandler((error, request, reply) => {
     request.log.error({ err: error }, 'Request failed');
     const status =
-      error instanceof ZodError
+      (error instanceof ZodError || (error instanceof Error && error.name === 'ZodError'))
         ? 400
         : error instanceof Error &&
             'statusCode' in error &&
