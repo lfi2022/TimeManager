@@ -88,6 +88,8 @@ export class AuthService {
       where: { companyId, email: data.email, active: true },
     }));
     if (!user || !(await verifyPassword(user.passwordHash, data.password))) return null;
+    const subscription = await withCompanyId(this.prisma, companyId, transaction => transaction.subscription.findUnique({ where: { companyId } }));
+    if (!subscription || subscription.status !== 'ACTIVE') return user.role === 'ADMIN' ? { suspended: true as const } : null;
     const token = this.newToken();
     await withCompanyId(this.prisma, companyId, transaction => transaction.userSession.create({
       data: { companyId, userId: user.id, tokenHash: this.tokenHash(token), expiresAt: this.expiresAt(this.config.SESSION_TTL_HOURS * 60) },

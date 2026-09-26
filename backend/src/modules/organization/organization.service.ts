@@ -135,6 +135,7 @@ export class OrganizationService {
       next.locale,
     );
     if (!rows[0]?.updated) return null;
+    if (!next.active) await withCompanyId(this.prisma, id, tx => tx.userSession.updateMany({ where: { companyId: id, invalidatedAt: null }, data: { invalidatedAt: new Date() } }));
     await this.audit(id, {
       action:
         next.active === current.active
