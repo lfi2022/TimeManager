@@ -102,6 +102,20 @@ export async function registerAuthRoutes(
       return reply.clearCookie(sessionCookie, { path: '/' }).code(204).send();
     },
   );
+  app.post(
+    '/api/auth/change-password',
+    { preHandler: requireCsrf },
+    async (request, reply) => {
+      if (!auth) return unavailable(reply);
+      const password = (request.body as { password?: unknown })?.password;
+      if (typeof password !== 'string' || password.length < auth.configuration.PASSWORD_MIN_LENGTH)
+        return reply.code(400).send({ error: { code: 'BAD_REQUEST', message: 'Le mot de passe ne respecte pas la longueur minimale.' } });
+      const changed = await auth.changePasswordFromSession(request.cookies[sessionCookie], password);
+      if (!changed)
+        return reply.code(401).send({ error: { code: 'UNAUTHENTICATED', message: 'Session invalide ou expiree.' } });
+      return reply.code(204).send();
+    },
+  );
   app.get('/api/me', async (request, reply) => {
     if (!auth) return unavailable(reply);
     const session = await auth.userSession(request.cookies[sessionCookie]);
