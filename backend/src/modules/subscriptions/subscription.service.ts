@@ -43,6 +43,7 @@ export class SubscriptionService {
       const subscription = await tx.subscription.findUnique({ where: { companyId } });
       if (!subscription) return null;
       await tx.company.update({ where: { id: companyId }, data: { active: !suspended } });
+      if (suspended) await tx.userSession.updateMany({ where: { companyId, invalidatedAt: null }, data: { invalidatedAt: new Date() } });
       return tx.subscription.update({ where: { companyId }, data: { status: suspended ? 'SUSPENDED' : 'ACTIVE', suspendedAt: suspended ? new Date() : null } });
     });
     if (result) await this.audit.recordPlatform(companyId, { action: suspended ? 'SUBSCRIPTION_SUSPENDED' : 'SUBSCRIPTION_REACTIVATED', entityType: 'Subscription', entityId: result.id, platformUserId });
