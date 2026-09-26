@@ -1,4 +1,4 @@
-import type { CompanyRole, PrismaClient } from '@prisma/client';
+import type { CompanyRole, Prisma, PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { requireRole } from '../../security/authorization.js';
 import { hashPassword } from '../../security/password.js';
@@ -78,6 +78,17 @@ export class OrganizationService {
 
   private async audit(companyId: string, event: { action: string; entityType: string; entityId?: string; actorUserId?: string; platformUserId?: string; metadata?: object }) {
     await this.auditService.recordPlatform(companyId, event);
+  }
+
+  private async requireAvailableSeat(tx: Prisma.TransactionClient, companyId: string) {
+    const subscription = await tx.subscription.findUnique({ where: { companyId }, include: { plan: true } });
+    const included = subscription && typeof subscription.plan.limits === 'object' && subscription.plan.limits !== null && typeof (subscription.plan.limits as { activeUsers?: unknown }).activeUsers === 'number' ? (subscription.plan.limits as { activeUsers: number }).activeUsers : 0;
+    const capacity = included + (subscription?.extraSeats ?? 0);
+    const activeUsers = await tx.user.count({ where: { companyId, active: true } });
+    if (!subscription || subscription.status !== 'ACTIVE' || activeUsers >= capacity) {
+      const error = Object.assign(new Error('La limite de sieges de cet abonnement est atteinte.'), { statusCode: 409, code: 'SEAT_LIMIT' });
+      throw error;
+    }
   }
 
   async platformCompanies() {
@@ -163,6 +174,7 @@ export class OrganizationService {
     const created = await withCompanyId(this.prisma, companyId, async (tx) => {
       const company = await tx.company.findFirst({ where: { id: companyId } });
       if (!company) return null;
+      if (data.active) await this.requireAvailableSeat(tx, companyId);
       return tx.user.create({
         data: {
           companyId, email: data.email, passwordHash: await hashPassword(data.password),
@@ -210,6 +222,7 @@ export class OrganizationService {
       if (!user) return { kind: 'not-found' as const };
       const active = patch.active ?? user.active;
       const role = patch.role ?? user.role;
+      if (!user.active && active) await this.requireAvailableSeat(tx, companyId);
       const updated = await tx.user.update({
         where: { id: userId },
         data: { active, role, ...(patch.password ? { passwordHash: await hashPassword(patch.password), forcePasswordChange: patch.forcePasswordChange ?? false } : {}) },
@@ -282,8 +295,9 @@ export class OrganizationService {
     requireRole(context, ['ADMIN']);
     const data = userInput.parse(input);
     const passwordHash = await hashPassword(data.password);
-    const created = await withTenant(this.prisma, context, (tx, tenant) =>
-      tx.user.create({
+    const created = await withTenant(this.prisma, context, async (tx, tenant) => {
+      await this.requireAvailableSeat(tx, tenant.companyId);
+      return tx.user.create({
         data: {
           companyId: tenant.companyId,
           email: data.email,
@@ -304,8 +318,8 @@ export class OrganizationService {
           role: true,
           active: true,
         },
-      }),
-    );
+      });
+    });
     await this.audit(context.companyId, {
       action: 'USER_CREATED',
       entityType: 'User',
@@ -326,6 +340,7 @@ export class OrganizationService {
           where: { id, companyId: tenant.companyId },
         });
         if (!user) return null;
+        if (!user.active && data.active === true) await this.requireAvailableSeat(tx, tenant.companyId);
         return tx.user.update({
           where: { id },
           data: Object.fromEntries(

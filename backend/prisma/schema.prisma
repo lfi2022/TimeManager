@@ -379,6 +379,7 @@ model Subscription {
   planId String @db.Uuid
   status SubscriptionStatus @default(ACTIVE)
   suspendedAt DateTime? @db.Timestamptz(6)
+  extraSeats Int @default(0)
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
   company Company @relation(fields:[companyId],references:[id],onDelete:Cascade)

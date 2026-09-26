@@ -99,8 +99,8 @@ export async function buildApp(
           : 500;
     return reply.code(status).send({
       error: {
-        code: status === 500 ? 'INTERNAL_ERROR' : 'BAD_REQUEST',
-        message: status === 500 ? 'Erreur interne.' : 'RequÃªte invalide.',
+        code: status === 500 ? 'INTERNAL_ERROR' : status === 409 ? 'CONFLICT' : 'BAD_REQUEST',
+        message: status === 500 ? 'Erreur interne.' : status === 409 ? (typeof error === 'object' && error !== null && 'code' in error && error.code === 'SEAT_LIMIT' ? 'La limite de sieges de cet abonnement est atteinte.' : 'Cette adresse e-mail est deja attribuee a une autre entreprise.') : 'Requete invalide.',
       },
     });
   });
