@@ -5,7 +5,7 @@ import { withTenant } from '../../tenancy/tenant-prisma.js';
 
 const tenantUserInputSchema = z
   .object({
-    email: z.string().email().max(320),
+    email: z.string().trim().toLowerCase().email().max(320),
     passwordHash: z.string().min(1),
     firstName: z.string().trim().min(1).max(100),
     lastName: z.string().trim().min(1).max(100),

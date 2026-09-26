@@ -10,7 +10,7 @@ import { withCompanyId, withTenant } from '../../tenancy/tenant-prisma.js';
 const loginSchema = z
   .object({
     companySlug: z.string().trim().min(1).max(100).optional(),
-    email: z.string().email().max(320),
+    email: z.string().trim().toLowerCase().email().max(320),
     password: z.string().min(1).max(1024),
   })
   .strict();

@@ -27,7 +27,7 @@ export const companyPatch = companyInput
   .strict();
 export const userInput = z
   .object({
-    email: z.string().email().max(320),
+    email: z.string().trim().toLowerCase().email().max(320),
     password: z.string().min(12).max(1024),
     firstName: z.string().trim().min(1).max(100),
     lastName: z.string().trim().min(1).max(100),
@@ -175,6 +175,23 @@ export class OrganizationService {
     });
     if (created) await this.audit(companyId, { action: 'SUPPORT_USER_CREATED', entityType: 'User', entityId: created.id, platformUserId, metadata: { role: created.role, active: created.active } });
     return created;
+  }
+
+  async supportReleaseUserEmail(platformUserId: string, companyId: string, userId: string) {
+    const released = await withCompanyId(this.prisma, companyId, async (tx) => {
+      const user = await tx.user.findFirst({ where: { id: userId, companyId } });
+      if (!user) return null;
+      const releasedEmail = `released-${user.id}@archived.tempopoint.invalid`;
+      const updated = await tx.user.update({
+        where: { id: user.id },
+        data: { email: releasedEmail, active: false, forcePasswordChange: false },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true, forcePasswordChange: true },
+      });
+      await tx.userSession.updateMany({ where: { companyId, userId: user.id, invalidatedAt: null }, data: { invalidatedAt: new Date() } });
+      return updated;
+    });
+    if (released) await this.audit(companyId, { action: 'SUPPORT_USER_EMAIL_RELEASED', entityType: 'User', entityId: userId, platformUserId });
+    return released;
   }
 
   async supportUpdateUser(

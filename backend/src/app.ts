@@ -85,7 +85,9 @@ export async function buildApp(
   });
   app.setErrorHandler((error, request, reply) => {
     request.log.error({ err: error }, 'Request failed');
+    const prismaUnique = typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
     const status =
+      prismaUnique ? 409 :
       (error instanceof ZodError || (error instanceof Error && error.name === 'ZodError'))
         ? 400
         : error instanceof Error &&
