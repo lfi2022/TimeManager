@@ -46,6 +46,9 @@ export class DashboardService {
         } as never,
       });
       const encoded = new Set(entries.map((e) => e.userId)).size;
+      const subscription = c.role === 'WORKER' ? null : await tx.subscription.findUnique({ where: { companyId: t.companyId }, include: { plan: true } });
+      const includedSeats = subscription && typeof subscription.plan.limits === 'object' && subscription.plan.limits !== null && typeof (subscription.plan.limits as { activeUsers?: unknown }).activeUsers === 'number' ? (subscription.plan.limits as { activeUsers: number }).activeUsers : 0;
+      const seatCapacity = subscription?.status === 'ACTIVE' ? includedSeats + subscription.extraSeats : 0;
       const balanceRows = await tx.timeBalanceTransaction.findMany({
         where: {
           companyId: t.companyId,
@@ -59,6 +62,7 @@ export class DashboardService {
         missing: Math.max(0, activeUsers - encoded),
         anomalies,
         balanceMinutes: balanceRows.reduce((n, x) => n + x.minutes, 0),
+        seats: c.role === 'WORKER' ? undefined : { active: activeUsers, capacity: seatCapacity, remaining: Math.max(0, seatCapacity - activeUsers) },
       };
     });
   }
