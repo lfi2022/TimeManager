@@ -46,6 +46,7 @@ export const userPatch = userInput
     active: z.boolean().optional(),
   })
   .strict();
+const supportUserInput = userInput.extend({ active: z.boolean().optional().default(true), forcePasswordChange: z.boolean().optional().default(true) }).strict();
 export const teamInput = z
   .object({
     name: z.string().trim().min(1).max(160),
@@ -146,7 +147,7 @@ export class OrganizationService {
       tx.user.findMany({
         where: { companyId },
         orderBy: [{ active: 'desc' }, { email: 'asc' }],
-        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true, forcePasswordChange: true },
       }),
     );
     await this.audit(companyId, {
@@ -155,6 +156,25 @@ export class OrganizationService {
       platformUserId,
     });
     return users;
+  }
+
+  async supportCreateUser(platformUserId: string, companyId: string, input: unknown) {
+    const data = supportUserInput.parse(input);
+    const created = await withCompanyId(this.prisma, companyId, async (tx) => {
+      const company = await tx.company.findFirst({ where: { id: companyId } });
+      if (!company) return null;
+      return tx.user.create({
+        data: {
+          companyId, email: data.email, passwordHash: await hashPassword(data.password),
+          firstName: data.firstName, lastName: data.lastName, role: data.role, active: data.active,
+          forcePasswordChange: data.forcePasswordChange, employeeNumber: cleanOptional(data.employeeNumber) ?? null,
+          phone: cleanOptional(data.phone) ?? null, timezone: cleanOptional(data.timezone) ?? null, locale: cleanOptional(data.locale) ?? null,
+        },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true, forcePasswordChange: true },
+      });
+    });
+    if (created) await this.audit(companyId, { action: 'SUPPORT_USER_CREATED', entityType: 'User', entityId: created.id, platformUserId, metadata: { role: created.role, active: created.active } });
+    return created;
   }
 
   async supportUpdateUser(
@@ -173,16 +193,10 @@ export class OrganizationService {
       if (!user) return { kind: 'not-found' as const };
       const active = patch.active ?? user.active;
       const role = patch.role ?? user.role;
-      if (user.active && user.role === 'ADMIN' && (!active || role !== 'ADMIN')) {
-        const otherAdmins = await tx.user.count({
-          where: { companyId, active: true, role: 'ADMIN', id: { not: userId } },
-        });
-        if (otherAdmins === 0) return { kind: 'last-admin' as const };
-      }
       const updated = await tx.user.update({
         where: { id: userId },
         data: { active, role, ...(patch.password ? { passwordHash: await hashPassword(patch.password), forcePasswordChange: patch.forcePasswordChange ?? false } : {}) },
-        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true, active: true, forcePasswordChange: true },
       });
       if (!active || patch.password)
         await tx.userSession.updateMany({

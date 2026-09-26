@@ -331,10 +331,10 @@ export async function registerAuthRoutes(
   );
 
   app.get('/api/platform/companies/:id/users', { preHandler: requirePlatform }, async (request) => ({ data: { users: await organizationService!.supportUsers(platformUserId(request), (request.params as { id: string }).id) } }));
+  app.post('/api/platform/companies/:id/users', { preHandler: [requireCsrf, requirePlatform] }, async (request, reply) => { const user = await organizationService!.supportCreateUser(platformUserId(request), (request.params as { id: string }).id, request.body); return user ? reply.code(201).send({ data: { user } }) : notFound(reply); });
   app.patch('/api/platform/companies/:companyId/users/:userId', { preHandler: [requireCsrf, requirePlatform] }, async (request, reply) => {
     const result = await organizationService!.supportUpdateUser(platformUserId(request), (request.params as { companyId: string }).companyId, (request.params as { userId: string }).userId, request.body);
     if (result.kind === 'not-found') return notFound(reply);
-    if (result.kind === 'last-admin') return reply.code(409).send({ error: { code: 'LAST_ACTIVE_ADMIN', message: 'Attribuez d abord un autre administrateur actif.' } });
     return { data: { user: result.user } };
   });
   app.get(
