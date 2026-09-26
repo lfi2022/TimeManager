@@ -74,7 +74,13 @@ export class AuthService {
         'SELECT * FROM "auth_user_tenant_by_email"($1)', data.email,
       );
       // Never choose a tenant arbitrarily when an address is shared.
-      if (matches.length !== 1) return null;
+      if (matches.length !== 1) {
+        const suspended = await this.prisma.$queryRawUnsafe<{ userId: string; companyId: string }[]>('SELECT * FROM "auth_suspended_admin_by_email"($1)', data.email);
+        if (suspended.length !== 1) return null;
+        const candidate = await withCompanyId(this.prisma, suspended[0]!.companyId, transaction => transaction.user.findFirst({ where: { id: suspended[0]!.userId, active: true, role: 'ADMIN' } }));
+        if (candidate && await verifyPassword(candidate.passwordHash, data.password)) return { suspended: true as const };
+        return null;
+      }
       companyId = matches[0]!.companyId;
     }
     if (!companyId) return null;

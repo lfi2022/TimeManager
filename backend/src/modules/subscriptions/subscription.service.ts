@@ -41,7 +41,9 @@ export class SubscriptionService {
   async suspend(platformUserId: string, companyId: string, suspended: boolean) {
     const result = await withCompanyId(this.prisma, companyId, async tx => {
       const subscription = await tx.subscription.findUnique({ where: { companyId } });
-      return subscription ? tx.subscription.update({ where: { companyId }, data: { status: suspended ? 'SUSPENDED' : 'ACTIVE', suspendedAt: suspended ? new Date() : null } }) : null;
+      if (!subscription) return null;
+      await tx.company.update({ where: { id: companyId }, data: { active: !suspended } });
+      return tx.subscription.update({ where: { companyId }, data: { status: suspended ? 'SUSPENDED' : 'ACTIVE', suspendedAt: suspended ? new Date() : null } });
     });
     if (result) await this.audit.recordPlatform(companyId, { action: suspended ? 'SUBSCRIPTION_SUSPENDED' : 'SUBSCRIPTION_REACTIVATED', entityType: 'Subscription', entityId: result.id, platformUserId });
     return result;

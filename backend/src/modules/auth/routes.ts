@@ -82,12 +82,9 @@ export async function registerAuthRoutes(
       if (!auth) return unavailable(reply);
       const result = await auth.loginUser(request.body);
       if (!result)
-        return reply.code(401).send({
-          error: {
-            code: 'INVALID_CREDENTIALS',
-            message: 'Identifiants invalides.',
-          },
-        });
+        return reply.code(401).send({ error: { code: 'INVALID_CREDENTIALS', message: 'Identifiants invalides.' } });
+      if ('suspended' in result)
+        return reply.code(403).send({ error: { code: 'COMPANY_SUSPENDED', message: 'Votre entreprise a ete desactivee suite a un probleme technique ou administratif. Contactez le support TempoPoint.' } });
       return reply
         .setCookie(sessionCookie, result.token, cookieOptions(secureCookies))
         .send({ data: { user: result.identity } });
